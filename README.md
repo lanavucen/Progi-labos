@@ -21,10 +21,15 @@ KLjučni zahtjevi našeg rada su: cjelovita web aplikacija za učenje stranog je
 > Andrija Janušić
 > 
 > Mihaela Novak
+> 
 > Mislav Putarek
+> 
 > Zvonimir Stracenski
+> 
 > Nikola Šimunić
+> 
 > Jan Volenac
+> 
 > Lana Vučen
 
 # Kontribucije
