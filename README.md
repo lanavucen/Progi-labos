@@ -19,6 +19,7 @@ KLjučni zahtjevi našeg rada su: cjelovita web aplikacija za učenje stranog je
 
 # Članovi tima
 > Andrija Janušić
+> 
 > Mihaela Novak
 > Mislav Putarek
 > Zvonimir Stracenski
