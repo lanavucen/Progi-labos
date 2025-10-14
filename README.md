@@ -18,13 +18,13 @@ KLjučni zahtjevi našeg rada su: cjelovita web aplikacija za učenje stranog je
 # Tehnologije
 
 # Članovi tima
-Andrija Janušić
-Mihaela Novak
-Mislav Putarek
-Zvonimir Stracenski
-Nikola Šimunić
-Jan Volenac
-Lana Vučen
+> Andrija Janušić
+> Mihaela Novak
+> Mislav Putarek
+> Zvonimir Stracenski
+> Nikola Šimunić
+> Jan Volenac
+> Lana Vučen
 
 # Kontribucije
 > CONTRIBUTING.md
