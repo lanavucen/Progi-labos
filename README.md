@@ -3,7 +3,7 @@
 
 
 # Opis projekta
-Ovaj projekt je rezultat timskog rada u sklopu projeknog zadatka kolegija [Programsko inženjerstvo](https://www.fer.unizg.hr/predmet/proinz) na Fakultetu elektrotehnike i računarstva Sveučilišta u Zagrebu. 
+Ovaj je projekt rezultat timskog rada u sklopu projeknog zadatka kolegija [Programsko inženjerstvo](https://www.fer.unizg.hr/predmet/proinz) na Fakultetu elektrotehnike i računarstva Sveučilišta u Zagrebu. 
 
 Cilj ovog projekta je olakšati učenje stranog jezika svim zainteresiranim korisnicima i predstaviti im zabavan i interaktivan način razvoja vokabulara. 
 U današnjem svijetu imamo pristup raznim tehnologijama, ali nekada nam ni one nisu dovoljne da saznamo sve što nas zanima. Stoga, želimo predstaviti naš način za razvoj željenih vještina.
