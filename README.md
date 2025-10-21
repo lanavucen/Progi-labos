@@ -10,7 +10,7 @@ Kao tim mladih programera, izuzetno smo motivirani razviti aplikaciju FlipMemo k
 Ključni zahtjevi našeg rada su: 
 - cjelovita aplikacija za učenje stranog jezika
 -  dokumentacija o kontinuiranom radu
-- povezivanje svih dijelova aplikacije nužnih za njezino ispravno funkcioniranje.
+- povezivanje svih dijelova aplikacije nužnih za njezino ispravno funkcioniranje
 
 # Tehnologije
 > Frontend -
