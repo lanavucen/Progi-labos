@@ -4,7 +4,7 @@ Ovaj je projekt rezultat timskog rada u sklopu projektnog zadatka kolegija [Prog
 
 Cilj ovog projekta je olakšati učenje stranog jezika te razvoj vokabulara na zabavan i interaktivan način. Funkcionalnosti aplikacije temelje se na učenju na osnovu ponavljanja s odmakom (eng. spaced repetition). Aplikacija je namijenjena prvenstveno učenicima i studentima kao pomoć u učenju, kao i svim ostalim zainteresiranim korisnicima.
 
-Kao tim mladih programera, izuzetno smo motivirani razviti aplikaciju FlipMemo koja bi korisnicima olakšala učenje stranog jezika, a nama koristila da se razvijamo i proširujemo svoje vještine i kolegijalnost. Konačno, želimo primijeniti dosad stečena znanja tijekom realizacije ovog projekta.
+Kao tim mladih programera, izuzetno smo motivirani razviti aplikaciju FlipMemo koja bi korisnicima olakšala učenje stranog jezika, a nama koristila da se razvijamo i proširujemo svoje vještine i kolegijalnost. Konačno, želimo primijeniti dosad stečena znanja realizirajući ovaj projekt.
 
 # Funkcijski zahtjevi
 Ključni zahtjevi našeg rada su: 
