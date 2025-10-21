@@ -2,9 +2,9 @@
 # Opis projekta
 Ovaj je projekt rezultat timskog rada u sklopu projektnog zadatka kolegija [Programsko inženjerstvo](https://www.fer.unizg.hr/predmet/proinz) na Fakultetu elektrotehnike i računarstva Sveučilišta u Zagrebu.
 
-Cilj ovog projekta je olakšati učenje stranog jezika te razvoj vokabulara na zabavan i interaktivan način. Funkcionalnosti aplikacije temelje se na učenju na osnovu ponavljanja s odmakom (eng. spaced repetition). Aplikacija je namijenjena prvenstveno učenicima i studentima kao pomoć u učenju, kao i svim ostalim zainteresiranim korisnicima.
+Cilj ovog studentskog timskog projekta je konstruiranje web-aplikacije koja će korisnicima na jednostavan i interaktivan način omogućiti učenje stranog jezika te razvoj vokabulara s fokusom na engleski jezik. Aplikacija kao temeljnu osnovu pristupa učenja novog jezika koristi ponavljanje s odmakom (eng. spaced repetition). Aplikacija je namijenjena prvenstveno učenicima i studentima kao pomoć u učenju, ali i svim ostalim zainteresiranim korisnicima.
 
-Kao tim mladih programera, izuzetno smo motivirani razviti aplikaciju FlipMemo koja bi korisnicima olakšala učenje stranog jezika, a nama koristila da se razvijamo i proširujemo svoje vještine i kolegijalnost. Konačno, želimo primijeniti dosad stečena znanja realizirajući ovaj projekt.
+Kao tim mladih inženjera, izuzetno smo motivirani razviti aplikaciju FlipMemo koja bi korisnicima olakšala učenje stranog jezika, a nama koristila kao prilika za usavršavanje svojih znanja i vještina u području izrade programske potpore, osnovnih sposobnosti rada u timu i kolegijalnosti. Konačno, želimo ovaj timski rad iskoristiti kao kulminaciju svog stečenog znanja na prijediplomskom studiju te kao uvod u buduće osobne karijere.
 
 # Funkcijski zahtjevi
 Ključni zahtjevi našeg rada su: 
