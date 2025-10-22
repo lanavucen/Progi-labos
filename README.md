@@ -15,17 +15,17 @@ Ključni zahtjevi našeg rada su:
 # Tehnologije
 > Frontend - React.js
 > 
-> Backend -
+> Backend - Node.js
 > 
 > Baza podataka - PostreSQL
 >  
-> Dizajn -
+> Dizajn - Figma
 > 
-> Testiranje -
+> Testiranje - Postman
 > 
 > UML - Astah UML
 > 
-> Deployment -
+> Deployment - Render
 
 # Članovi tima
 > Lana Vučen - voditelj, frontend, dizajn
