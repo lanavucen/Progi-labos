@@ -13,17 +13,17 @@ Ključni zahtjevi našeg rada su:
 - povezivanje svih dijelova aplikacije nužnih za njezino ispravno funkcioniranje
 
 # Tehnologije
-> Frontend -
+> Frontend - React.js
 > 
 > Backend -
 > 
-> Baza podataka -
+> Baza podataka - PostreSQL
 >  
 > Dizajn -
 > 
 > Testiranje -
 > 
-> UML -
+> UML - Astah UML
 > 
 > Deployment -
 
