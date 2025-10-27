@@ -1,0 +1,59 @@
+
+body{
+    background: #e6deb9;
+    background:linear-gradient(
+        to right,
+        rgb(229, 220, 136),
+        #e6deb9,
+        rgb(229, 220, 136)
+        
+    );
+    
+    margin: 0;
+}
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.header{
+    
+    border-radius: 20px;
+
+}
+.naslov{
+    color:rgb(90, 89, 89);
+    font-size: 3em;
+    
+    text-align: center;
+    font-family:Georgia, 'Times New Roman', Times, serif;
+    
+}
+.opis{
+    border: 1px;
+    border-radius: 10px;
+    border-color: solid black;
+    font-size: 2em;
+    text-align: center;
+    word-wrap: break-word;
+    padding-left: 5%;
+    padding-right: 5%;
+    font-family:Georgia, 'Times New Roman', Times, serif;
+
+}
+.profilbutton{
+    font-family:Georgia, 'Times New Roman', Times, serif;
+    font-size: 1.3em;
+    width: 100px;
+    height: 40px;
+    align-items: center;
+    cursor: pointer;
+    background-color: rgb(241, 190, 94);
+    border-radius: 15px;
+    letter-spacing: 2px;
+    border-color: #e8c631;
+
+}.profilbutton:hover{
+    background-color: rgb(225, 197, 146);
+}
