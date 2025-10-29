@@ -18,10 +18,10 @@ body{
     justify-content: center;
 }
 .header{
-    
     border-radius: 20px;
 
 }
+/*Ime aplikacije*/
 .naslov{
     color:rgb(90, 89, 89);
     font-size: 3em;
@@ -30,6 +30,7 @@ body{
     font-family:Georgia, 'Times New Roman', Times, serif;
     
 }
+/*Opisni tekst*/
 .opis{
     border: 1px;
     border-radius: 10px;
@@ -42,18 +43,75 @@ body{
     font-family:Georgia, 'Times New Roman', Times, serif;
 
 }
+/*Gumb za prijavu*/
 .profilbutton{
     font-family:Georgia, 'Times New Roman', Times, serif;
     font-size: 1.3em;
-    width: 100px;
-    height: 40px;
+    width: 8em;
+    height: 2em;
     align-items: center;
     cursor: pointer;
     background-color: rgb(241, 190, 94);
     border-radius: 15px;
     letter-spacing: 2px;
     border-color: #e8c631;
+    box-shadow: 0 5px 10px rgba(255, 123, 0, 0.2);
 
 }.profilbutton:hover{
     background-color: rgb(225, 197, 146);
+    transform: scale(1.15);
+}
+
+/*Opis aplikacije*/
+
+.uputstva{
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+.upute{
+    margin-right: 3em;
+    margin-left: 3em;
+    margin-top: 10em;
+    background-color: #e6deb9;
+    border-radius: 2em;
+    width: 200px;
+    height: 100px;
+    border:3px solid rgb(121, 121, 78);
+    display: flex;
+    padding-left: 2em;
+    padding-right: 2em;
+    transition:  0.5s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    overflow-wrap: anywhere;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    
+
+}
+.upute:h1{
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+.upute p{
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    opacity: 0;
+    transition:opacity 0.5s ease-in-out;
+}
+.upute:hover {
+    height: 300px;
+    transform: scale(1.1);
+}
+.upute:hover p{
+    transition: 2.5s;
+    opacity: 1;
 }
