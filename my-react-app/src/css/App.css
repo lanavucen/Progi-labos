@@ -115,3 +115,7 @@ body{
     transition: 2.5s;
     opacity: 1;
 }
+
+.opis-text{
+    color: #eeee;
+}
