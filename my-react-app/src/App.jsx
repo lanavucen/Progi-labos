@@ -14,6 +14,7 @@ export default function App() {
     </div>
     <p className="opis"><Opis/></p>
     <button className="profilbutton" onClick={() => navigate("/Prijava")}>PRIJAVI SE</button>
+    <button className="profilbutton" onClick={() => navigate("/Igra")}>IGRAJ</button>
     <div className="uputstva">
       <div className="upute">
         <h1>OPIS</h1>
