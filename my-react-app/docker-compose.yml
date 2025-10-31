@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:13
+    container_name: progi-db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=bazepodataka
+      - POSTGRES_DB=progi
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
