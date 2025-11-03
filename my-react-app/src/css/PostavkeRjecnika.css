@@ -1,0 +1,103 @@
+
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:linear-gradient(
+        to right,
+        rgb(229, 220, 136),
+        #e6deb9,
+        rgb(229, 220, 136)
+        
+    );
+    min-height: 100vh;
+    height: 90em;
+    margin: 0;
+}
+.containerPR{
+    border-radius: 1em;
+    width: 40%;
+    height: 80em;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    align-items: center;
+    line-height: 0.5em;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.headerPR{
+    font-size: 4em;
+    margin-top: 1.5em;
+    text-align: center;
+    border-radius: 20px;
+
+}
+.PR{
+    margin-top: 3em;
+}
+
+.naslovPR{
+    font-size: 2em;
+    text-align: left;
+    color: rgb(62, 59, 59);
+    margin-top: 2em;
+    font-weight: bold;
+}
+.info {
+    display: flex;
+    margin-top: 1em;
+    flex-direction: row;
+}
+.info p{
+    font-size: 1.1em;
+}
+.info input{
+    margin-left: 1em;
+}
+
+.dodajRijecbutton{
+    margin-top: 1.5em;
+    font-size:1.5em;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2em;
+    width: 10em;
+    height: 2em;
+    text-align: center;
+    background-color: rgb(255, 252, 226);
+    color: rgb(0, 0, 0);
+    border-radius: 10px;
+    border:1px solid black;
+    margin-bottom: 1em;
+}
+.dodajRijecbutton:hover{
+    cursor: pointer;
+    background-color: rgb(245, 243, 175);
+}
+.prijavisebutton{
+    margin-top: 1em;
+    font-size:1.5em;
+    align-items: center;
+    justify-content: center;
+    width: 15em;
+    height: 2em;
+    text-align: center;
+    background-color: blue;
+    color: white;
+    border-radius: 10px;
+    border:1px solid black
+}
+.prijavisebutton:hover{
+    background-color: rgb(0, 0, 129);
+    cursor: pointer;
+}
+.error-message {
+  color: #d32f2f;
+  font-size: 0.5em;
+  margin-top: 15px;
+  margin-left: 40px;
+  margin-bottom: 10px;
+  text-align: left;
+  width: 100%;
+}
