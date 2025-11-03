@@ -20,6 +20,10 @@ Prije sljedeceg koraka otvoriti aplikajiju Docker Desktop.
 
 3. Instalacija paketa, postavljanje i pokretanje:
 
+Ako u pgadminu imate pasword koji se razlikuje od "bazepodataka" promijenite u:
+server.js linija 16:  "password: "bazepodataka","
+docker-compose.yml linija 8: "- POSTGRES_PASSWORD=bazepodataka"
+
 U terminalu otvorite folder my-react-app (cd ...\my-react-app) i upisite ove naredbe:
 
 npm install
@@ -32,7 +36,7 @@ CREATE TABLE users(
     name text not null,
     email text not null primary key,
     password text not null,
-    role smallint default 0 not null;
+    role smallint default 0 not null
 );
 INSERT INTO users(name, email, password, role) VALUES('koradmin', 'koradmin@gmail.com', 'koradmin', 2);
 INSERT INTO users(name, email, password, role) VALUES('admin', 'admin@gmail.com', 'admin', 1);
