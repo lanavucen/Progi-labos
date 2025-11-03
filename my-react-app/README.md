@@ -18,7 +18,7 @@ Bitno je da je opcija "Use WSL 2" oznacena. Bit ce potrebno restartati racunalo.
 Prije sljedeceg koraka otvoriti aplikajiju Docker Desktop.
 
 
-3. Instalacija paketa i postavljanje:
+3. Instalacija paketa, postavljanje i pokretanje:
 
 U terminalu otvorite folder my-react-app (cd ...\my-react-app) i upisite ove naredbe:
 
@@ -40,27 +40,17 @@ INSERT INTO users(name, email, password, role) VALUES('user', 'user@gmail.com', 
 \q
 
 
-
-4. Pokretanje:
-
-Otvorite 2 terminala i s oba se locirajte u my-react-app:
-U jednom napisite:
-node server.js
-
-U drugom:
 npm run dev
 
-Zatim otvorite link iz drugog terminala
-
+Zatim otvorite link iz terminala
 
 
 5. Zatvaranje aplikacije
 
-U terminalu s naredbom npm run dev stisni q i enter
-U terminalu node server.js stisni Ctrl + C.
-U prvom terminalu s naredbom docker-compose up -d zaustavi Docker kontejner naredbom:
+Naredbom: q + enter zatvarate aplikaciju
+Naredbom: docker-compose down zatvarate bazu u Docker kontejneru
+Naredbom: docker-compose down -v brisete bazu u Docker kontejneru
 
-docker-compose down
 
 
 

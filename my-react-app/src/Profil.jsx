@@ -28,7 +28,7 @@ function Profil() {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/users/${user.email}`, {
+      const response = await fetch(`/api/users/${user.email}`, {
         method: "DELETE"
       });
 

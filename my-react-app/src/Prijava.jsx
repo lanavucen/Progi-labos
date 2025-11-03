@@ -15,7 +15,7 @@ function Prijava() {
 
     try {
       const body = { email, password };
-      const response = await fetch("http://localhost:3001/api/prijava", {
+      const response = await fetch("/api/prijava", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)

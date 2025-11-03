@@ -43,7 +43,7 @@ function Registracija() {
 
     try {
       const body = { name, email, password };
-      const response = await fetch("http://localhost:3001/api/registracija", {
+      const response = await fetch("/api/registracija", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
