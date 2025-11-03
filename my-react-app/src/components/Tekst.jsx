@@ -1,4 +1,4 @@
 function Naslov() {
-  return <h1>APLIKACIJA</h1>;
+  return "APLIKACIJA";
 }
 export default Naslov;

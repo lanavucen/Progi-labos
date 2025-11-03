@@ -49,10 +49,17 @@ function Profil() {
     return <div>Učitavanje...</div>;
   }
 
+  const isUser = user && user.role === 0;
+  const isAdmin = user && user.role === 1;
+  const isMainAdmin = user && user.role === 2;
+
   return (
     <div className="containerprofil">
       <div className="headerprofila">
-        <h1>Bok, {user.name}</h1>
+        <h1>
+          Bok, {user.name} 
+          <span className="role-display"> ({isMainAdmin ? "Glavni Admin" : isAdmin ? "Admin" : "Korisnik"})</span>
+        </h1>
         <div className="gumbi">
           <button className="buttonpocetna" onClick={() => navigate("/")}>
             Pocetna
@@ -66,13 +73,32 @@ function Profil() {
         <div className="lista">
           <p className="kategorija">Podatci</p>
           <p className="kategorija">Statistika</p>
-          <p className="kategorija">Promjena lozinke</p>
+          <p
+            className="kategorija"
+            onClick={() => setIsChangePasswordVisible(!isChangePasswordVisible)}
+            style={{ cursor: "pointer" }}>
+            Promjena lozinke
+          </p>
           <p className="kategorija" onClick={handleDeleteAccount} style={{ cursor: "pointer", color: "red" }}>
             Brisanje profila
           </p>
           <p className="kategorija" onClick={handleLogout} style={{ cursor: "pointer" }}>
             Odjavi se
           </p>
+
+          {(isAdmin || isMainAdmin) && (
+            <p className="kategorija admin-link" onClick={() => alert("Otvaram prozor za upravljanje rječnikom!")}>
+              Upravljaj Rječnikom
+            </p>
+          )}
+
+          {isMainAdmin && (
+            <p
+              className="kategorija main-admin-link"
+              onClick={() => alert("Otvaram prozor za upravljanje korisnicima!")}>
+              Upravljaj Ulogama
+            </p>
+          )}
         </div>
         <div className="odlomak">
           <p>Ovdje možete vidjeti svoje podatke.</p>

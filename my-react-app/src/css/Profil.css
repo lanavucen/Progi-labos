@@ -62,7 +62,6 @@ body{
     height: 1.5em;
     text-align: left;
     padding-left: 1em;
-    border: 1px solid black;
 }
 .odlomak{
     flex: 2;
@@ -106,5 +105,6 @@ body{
 .buttonigraj:hover{
     transform: scale(1.05);
 }
+
 
 

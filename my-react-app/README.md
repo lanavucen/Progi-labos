@@ -14,7 +14,8 @@ Zatim je potrebno instalirati Docker Desktop:
 
 https://docs.docker.com/desktop/setup/install/windows-install/
 
-Bitno je da je opcija "Use WSL 2" oznacena. Bit ce potrebno restartati racunalo
+Bitno je da je opcija "Use WSL 2" oznacena. Bit ce potrebno restartati racunalo.
+Prije sljedeceg koraka otvoriti aplikajiju Docker Desktop.
 
 
 3. Instalacija paketa i postavljanje:
@@ -30,10 +31,12 @@ docker exec -it progi-db psql -U postgres progi
 CREATE TABLE users(
     name text not null,
     email text not null primary key,
-    password text not null
+    password text not null,
+    role smallint default 0 not null;
 );
-INSERT INTO users(name, email, password) VALUES('testuser', 'testuser@gmail.com', 'testuser');
-
+INSERT INTO users(name, email, password, role) VALUES('koradmin', 'koradmin@gmail.com', 'koradmin', 2);
+INSERT INTO users(name, email, password, role) VALUES('admin', 'admin@gmail.com', 'admin', 1);
+INSERT INTO users(name, email, password, role) VALUES('user', 'user@gmail.com', 'user', 0);
 \q
 
 
