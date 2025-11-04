@@ -2,7 +2,6 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  
 }
 
 body {
@@ -23,7 +22,7 @@ body {
 .game-container {
   border-radius: 0.5vh;
   height: 60vh;
-  width: 70vw;
+  width: max(70vw, 470px);
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -47,53 +46,50 @@ body {
   cursor: pointer;
   transition: background-color 0.2s;
   text-align: center;
-  width: 10vw;
+  font-size: 1.2em;
+  width: max(13vw, 100px);
 }
 
 .question{
     font-size: 24px;
-    color: #eee;
+    color: black;
     height: 3vh;
 }
 
-.answer:hover {
-  background-color: #ddd;
+.answer:hover, .submit-button:hover {
+  background-color: rgb(255, 140, 0);
 }
 
 .answer.selected {
-  background-color: #2196f3;
+  background-color: #ef5a5a;
   color: white;
 }
 
 .first-color { 
-	background: #222831; 
+	background: #feffdf; 
 }
 	
 .second-color { 
-	background: #2d4059; 
+	background: #ffe79a; 
 }
 
 .third-color { 
-	background: #ff5722; 
+	background: #ffa952; 
 }
 
 .fourth-color { 
-	background: #eeeeee; 
+	background: #ef5a5a; 
 }
 
 .back {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  width: 10vh;
-  height: 5vh;
-}
-
-button{
-    text-align: center;
+  border-radius: 5px;
+  width: max(13vh, 90px);
+  height: max(5vh, 30px);
+  font-size: 1.2em;
 }
 
 .result{
-    color: #eeeeee;
+    color: black;
+    height: 0.5vh;
+    font-size: 1.2em;
 }
