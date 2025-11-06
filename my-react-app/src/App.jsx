@@ -19,7 +19,7 @@ export default function App() {
       <button className="profilbutton" onClick={() => navigate("/Prijava")}>
         PRIJAVI SE
       </button>
-      <button className="profilbutton" onClick={() => navigate("/Igra")}>
+      <button className="profilbutton" onClick={() => navigate("/PostavkeIgre")}>
         IGRAJ
       </button>
       <div className="uputstva">

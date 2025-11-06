@@ -64,7 +64,7 @@ function Profil() {
           <button className="buttonpocetna" onClick={() => navigate("/")}>
             Pocetna
           </button>
-          <button className="buttonigraj" onClick={() => navigate("/Igra")}>
+          <button className="buttonigraj" onClick={() => navigate("/PostavkeIgre")}>
             Igraj
           </button>
         </div>
