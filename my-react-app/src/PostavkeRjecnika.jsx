@@ -152,7 +152,7 @@ function PostavkeRjecnika() {
             <ul className="word-list">
               {filteredWords.map(word => (
                 <li key={word.word_id} className="word-list-item">
-                  <span>{word.word_text} -> {word.translation_to_croatian}</span>
+                  <span>{word.word_text} -{">"} {word.translation_to_croatian}</span>
                   <div className="word-actions">
                     <button className="gumb_uloga izmijeni" onClick={() => handleEditWord_func(word)}>Izmijeni</button>
                     <button className="gumb_uloga democija" onClick={() => handleDeleteWord_func(word.word_id)}>Obriši</button>
