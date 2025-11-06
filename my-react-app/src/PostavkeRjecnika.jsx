@@ -92,7 +92,7 @@ function PostavkeRjecnika() {
   return (
     <div className="containerPR">
       <h1 className="headerPR">Postavke riječnika</h1>
-      <button className="Button" style={{ position: 'absolute', top: '40px', right: '400px' }} onClick={() => navigate(-1)}>Natrag</button>
+      <button className="Button" style={{ position: 'absolute', top: '0px', left: '0px' }} onClick={() => navigate(-1)}>Natrag</button>
       
       <div className="PR">
         <p className="naslovPR">Upravljanje jezicima:</p>

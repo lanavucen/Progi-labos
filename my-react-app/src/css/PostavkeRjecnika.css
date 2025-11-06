@@ -65,7 +65,7 @@ body{
     justify-content: center;
     margin-left: 2em;
     width: 10em;
-    height: 2em;
+    height: 1.5em;
     text-align: center;
     background-color: rgb(255, 252, 226);
     color: rgb(0, 0, 0);
@@ -139,6 +139,7 @@ body{
   border: 1px solid #eee;
   border-radius: 5px;
   margin-bottom: 8px;
+  background-color: white;
 }
 
 .word-list-item span {
