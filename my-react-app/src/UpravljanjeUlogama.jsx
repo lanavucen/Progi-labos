@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./css/PostavkeRjecnika.css"; 
+import "./css/UpravljanjeUlogama.css"; 
 
 function UpravljanjeUlogama() {
   const navigate = useNavigate();
@@ -75,11 +75,11 @@ function UpravljanjeUlogama() {
 
   return (
     <div className="containerPR">
+      <button className="natrag-button" onClick={() => navigate(-1)}>
+        Natrag
+      </button>
       <h1 className="headerPR">Upravljanje Ulogama</h1>
       <div className="PR">
-        <button className="Button" style={{float: 'right', marginBottom: '20px', marginLeft: '100px'}} onClick={() => navigate(-1)}>
-          Natrag
-        </button>
         <table className="user-table">
           <thead>
             <tr>
