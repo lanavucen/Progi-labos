@@ -34,7 +34,7 @@ CREATE TABLE users(
     name text not null,
     email text not null primary key,
     password text not null,
-    role smallint default 0 not null;
+    role smallint default 0 not null
 );
 INSERT INTO users(name, email, password, role) VALUES('koradmin', 'koradmin@gmail.com', 'koradmin', 2);
 INSERT INTO users(name, email, password, role) VALUES('admin', 'admin@gmail.com', 'admin', 1);
