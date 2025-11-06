@@ -9,6 +9,7 @@ import Registracija from "./Registracija";
 import Profil from "./Profil";
 import Igra from "./Igra";
 import PostavkeRjecnika from "./PostavkeRjecnika";
+import UpravljanjeUlogama from "./UpravljanjeUlogama";
 
 const router=createBrowserRouter([
   {
@@ -29,6 +30,10 @@ const router=createBrowserRouter([
   },{
     path:'/PostavkeRjecnika',
     element:<PostavkeRjecnika/>,
+  },
+  {
+    path:'/UpravljanjeUlogama',
+    element:<UpravljanjeUlogama/>
   }
 ]);
 

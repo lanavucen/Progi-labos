@@ -25,6 +25,8 @@ body{
     align-items: center;
     line-height: 0.5em;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    box-sizing: border-box;
+    overflow-y: auto;
 }
 .headerPR{
     font-size: 4em;
@@ -56,7 +58,7 @@ body{
     margin-left: 1em;
 }
 
-.dodajRijecbutton{
+.Button{
     margin-top: 1.5em;
     font-size:1.5em;
     align-items: center;
@@ -71,7 +73,88 @@ body{
     border:1px solid black;
     margin-bottom: 1em;
 }
-.dodajRijecbutton:hover{
+.Button:hover{
     cursor: pointer;
     background-color: rgb(245, 243, 175);
 }
+
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2em;
+}
+
+.user-table th, .user-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.user-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.gumb_uloga {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.promocija {
+    background-color: #0b7f26;
+}
+
+.democija {
+    background-color: #9b0e1b;
+}
+
+.izmijeni{
+    background-color: #a1a53c;
+}
+
+.language-select {
+  font-size: 1.1em;
+  padding: 8px;
+  margin-top: 1em;
+  min-width: 200px;
+  border-radius: 5px;
+}
+
+.word-list {
+  margin-top: 1em;
+  padding: 0;
+  list-style-type: none;
+}
+
+.word-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
+
+.word-list-item span {
+  font-weight: bold;
+}
+
+.word-actions button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.editing-section {
+  margin-top: 2em;
+  padding: 1.5em;
+  border: 2px dashed #007bff;
+  border-radius: 10px;
+}
+

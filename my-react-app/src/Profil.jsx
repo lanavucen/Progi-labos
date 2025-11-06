@@ -87,7 +87,12 @@ function Profil() {
           </p>
 
           {(isAdmin || isMainAdmin) && (
-            <p className="kategorija admin-link" onClick={() => alert("Otvaram prozor za upravljanje rječnikom!")}>
+            <p
+              className="kategorija admin-link"
+              // *** OVDJE JE PROMJENA ***
+              onClick={() => navigate('/PostavkeRjecnika')}
+              style={{cursor: 'pointer'}}
+            >
               Upravljaj Rječnikom
             </p>
           )}
@@ -95,7 +100,10 @@ function Profil() {
           {isMainAdmin && (
             <p
               className="kategorija main-admin-link"
-              onClick={() => alert("Otvaram prozor za upravljanje korisnicima!")}>
+              // *** OVDJE JE PROMJENA ***
+              onClick={() => navigate('/UpravljanjeUlogama')}
+              style={{ cursor: "pointer" }}
+            >
               Upravljaj Ulogama
             </p>
           )}

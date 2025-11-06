@@ -122,6 +122,111 @@ app.put("/api/users/:targetEmail/role", async (req, res) => {
   }
 });
 
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const { adminEmail } = req.query;
+
+    if (!adminEmail) {
+      return res.status(400).send("Nedostaje email administratora.");
+    }
+
+    const adminResult = await pool.query("SELECT role FROM users WHERE email = $1", [adminEmail]);
+    if (adminResult.rows.length === 0 || adminResult.rows[0].role !== 2) {
+      return res.status(403).send("Samo Glavni Administrator može vidjeti listu korisnika.");
+    }
+
+    const allUsers = await pool.query("SELECT name, email, role FROM users ORDER BY name");
+    
+    res.json(allUsers.rows);
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Greška na serveru");
+  }
+});
+
+app.get("/api/languages", async (req, res) => {
+  try {
+    const allLanguages = await pool.query("SELECT * FROM languages ORDER BY language_name");
+    res.json(allLanguages.rows);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+});
+
+app.post("/api/languages", async (req, res) => {
+  try {
+    const { language_name } = req.body;
+    const newLanguage = await pool.query(
+      "INSERT INTO languages (language_name) VALUES ($1) RETURNING *",
+      [language_name]
+    );
+    res.status(201).json(newLanguage.rows[0]);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+});
+
+app.delete("/api/languages/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query("DELETE FROM languages WHERE language_id = $1", [id]);
+    res.json("Jezik uspješno obrisan.");
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+});
+
+app.get("/api/words", async (req, res) => {
+  try {
+    const { language_id } = req.query;
+    const words = await pool.query("SELECT * FROM words WHERE language_id = $1 ORDER BY word_text", [language_id]);
+    res.json(words.rows);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+});
+
+app.post("/api/words", async (req, res) => {
+  try {
+    const { word_text, language_id, translation_to_croatian, phrases } = req.body;
+    const newWord = await pool.query(
+      "INSERT INTO words (word_text, language_id, translation_to_croatian, phrases) VALUES ($1, $2, $3, $4) RETURNING *",
+      [word_text, language_id, translation_to_croatian, phrases]
+    );
+    res.status(201).json(newWord.rows[0]);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+});
+
+app.delete("/api/words/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query("DELETE FROM words WHERE word_id = $1", [id]);
+    res.json("Riječ uspješno obrisana.");
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+});
+
+app.put("/api/words/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { word_text, translation_to_croatian, phrases } = req.body;
+    const updatedWord = await pool.query(
+      "UPDATE words SET word_text = $1, translation_to_croatian = $2, phrases = $3 WHERE word_id = $4 RETURNING *",
+      [word_text, translation_to_croatian, phrases, id]
+    );
+    res.json(updatedWord.rows[0]);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+});
+
+
+
+
 app.listen(port, () => {
   console.log(`Server sluša na portu ${port}`);
 });

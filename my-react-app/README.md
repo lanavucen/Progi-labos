@@ -28,6 +28,8 @@ docker-compose up -d
 
 docker exec -it progi-db psql -U postgres progi
 
+(ako ne radi ctrl + V probaj stisnut desni klik misa)
+
 CREATE TABLE users(
     name text not null,
     email text not null primary key,
@@ -37,7 +39,35 @@ CREATE TABLE users(
 INSERT INTO users(name, email, password, role) VALUES('koradmin', 'koradmin@gmail.com', 'koradmin', 2);
 INSERT INTO users(name, email, password, role) VALUES('admin', 'admin@gmail.com', 'admin', 1);
 INSERT INTO users(name, email, password, role) VALUES('user', 'user@gmail.com', 'user', 0);
+
+
+CREATE TABLE languages (
+    language_id SERIAL PRIMARY KEY,
+    language_name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE words (
+    word_id SERIAL PRIMARY KEY,
+    word_text TEXT NOT NULL,
+    language_id INT NOT NULL,
+    translation_to_croatian TEXT,
+    phrases TEXT[],
+    pronounciation BYTEA,
+
+    CONSTRAINT fk_language
+      FOREIGN KEY(language_id) 
+      REFERENCES languages(language_id)
+      ON DELETE CASCADE,
+
+    UNIQUE (word_text, language_id)
+);
+
+INSERT INTO languages (language_name) VALUES ('Engleski');
+INSERT INTO languages (language_name) VALUES ('Njemački');
+INSERT INTO languages (language_name) VALUES ('Španjolski');
+
 \q
+
 
 
 npm run dev
