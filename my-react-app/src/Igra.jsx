@@ -141,8 +141,7 @@ export default function Igra() {
             Next
           </button>
         </div>
-
-        {result && <div className={styles.result}>{result}</div>}
+        <div className={styles.result}>{result || ""}</div>
       </div>
     </div>
   );

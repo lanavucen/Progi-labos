@@ -52,6 +52,7 @@ function PostavkeIgre() {
 
     return (
         <div className={styles.containerPostavkeIgre}>
+            <button className={styles.backButton} onClick={() => navigate(-1)}>Go Back</button>
             <h1 className={styles.headerPostavkeIgre}>Postavke igre</h1>
             <p className={styles.paragraphsPostavke}>Odaberi mod učenja:</p>
             <select className={styles.dropdown} value={selectedMod} onChange={handleModChange}> 

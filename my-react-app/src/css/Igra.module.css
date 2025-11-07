@@ -8,7 +8,7 @@
 
 .gameContainer {
   border-radius: 0.5vh;
-  height: 60vh;
+  height: 65vh;
   width: max(70vw, 470px);
   display: flex;
   align-items: center;
@@ -82,11 +82,14 @@
   font-size: 1.2em;
   position: absolute;
   left: 0vh;
-  top: 20vh;
+  top: 10vh;
 }
 
 .result {
   color: black;
-  height: 0.5vh;
+  min-height: max(2.5vh, 10px);
   font-size: 1.2em;
+  text-align: center;
+  margin-top: 1vh;
 }
+
