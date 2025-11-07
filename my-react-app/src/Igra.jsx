@@ -1,17 +1,24 @@
 import "./css/Igra.css";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function Igra() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { mod, rjecnik } = location.state || {};
+  const { mod, rjecnik, smijeIgrat } = location.state || {};
+
   const [words, setWords] = useState([]);
-  const [currentWordOption, setCurrentWordOption] = useState(null); 
-  const [currentWordQuestion, setCurrentWordQuestion] = useState(null); 
-  const [choices, setChoices] = useState([]); 
+  const [choices, setChoices] = useState([]);
+  const [currentWord, setCurrentWord] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (!mod || !rjecnik) {
+      navigate("/postavkeIgre");
+    }
+  }, [mod, rjecnik, navigate]);
 
   const fetchWords = async (langId) => {
     if (!langId) {
@@ -19,67 +26,76 @@ export default function Igra() {
       return;
     }
     try {
-      const response = await fetch(`/api/words?language_id=${langId}`);
+      const response = await fetch(`/api/words?language_id=${langId}&mod=${mod}`);
       const data = await response.json();
       setWords(data);
-    } catch (err) { console.error("Greška pri dohvaćanju riječi:", err); }
+    } catch (err) {
+      console.error("Greška pri dohvaćanju riječi:", err);
+    }
   };
 
-useEffect(() => {
-  if (rjecnik) fetchWords(rjecnik);
-}, [rjecnik]);
-  
+  const fetchChoices = async (langId, wordId) => {
+    if (!langId || !wordId) {
+      setChoices([]);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/words?language_id=${langId}&mod=${mod}&word_id=${wordId}`);
+      const data = await response.json();
+      setChoices(data);
+    } catch (err) {
+      console.error("Greška pri dohvaćanju odabira:", err);
+    }
+  };
 
-const generateQuestion = () => {
-  const index = Math.floor(Math.random() * words.length);
-  const targetWord = words[index];
-  const potentialDistractors = words.filter(w => w.word_id !== targetWord.word_id);
-  const SortedPotentialDistractors = potentialDistractors.sort(() => Math.random() - 0.5);
-  const distractors = SortedPotentialDistractors.slice(0, 3);
-  if(mod == "mod1"){
-    const choicesRandom = [...distractors, targetWord].sort(() => Math.random() - 0.5).map(w => w.translation_to_croatian);
-    setCurrentWordQuestion(targetWord.word_text);
-    setCurrentWordOption(targetWord.translation_to_croatian);
-    setChoices(choicesRandom);
+  const generateQuestion = () => {
+    if (words.length === 0) return;
+    const index = Math.floor(Math.random() * words.length);
+    const targetWord = words[index];
+    setCurrentWord(targetWord);
+    setCurrentQuestion(mod === "mod1" ? targetWord.word_text : targetWord.translation_to_croatian);
+  };
 
-  } else if(mod == "mod2"){
-    const choicesRandom = [...distractors, targetWord].sort(() => Math.random() - 0.5).map(w => w.word_text);
-    setCurrentWordQuestion(targetWord.translation_to_croatian);
-    setCurrentWordOption(targetWord.word_text);
-    setChoices(choicesRandom);
+  useEffect(() => {
+    if (rjecnik) fetchWords(rjecnik);
+  }, [rjecnik]);
+
+  useEffect(() => {
+    if (words.length > 0) {
+      generateQuestion();
+    }
+  }, [words]);
+
+  useEffect(() => {
+    if (currentWord && rjecnik) fetchChoices(rjecnik, currentWord.word_id);
+  }, [currentWord, rjecnik]);
+
+ const handleSubmit = async () => {
+  if (!selectedAnswer) {
+    setResult("Please select an answer first!");
+    return;
+  }
+  try {
+    const res = await fetch(`/api/words/${currentWord.word_id}?language_id=${rjecnik}&mod=${mod}`);
+    const correctAnswer = await res.json(); 
+
+    if (selectedAnswer === correctAnswer) {
+      setResult("Correct!");
+    } else {
+      setResult(`Incorrect. The correct answer was "${correctAnswer}".`);
+    }
+  } catch (err) {
+    console.error("Greška pri dohvaćanju odgovora:", err);
+    setResult("Error fetching the answer. Try again.");
   }
 };
 
-useEffect(() => {
-  if (words.length > 0) {
-    generateQuestion();
-  }
-}, [words]);
 
-
-
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [result, setResult] = useState(null);
-
-
-  function handleSubmit() {
-    if (!selectedAnswer) {
-      setResult("Please select an answer first!");
-      return;
-    }
-
-    if (selectedAnswer === currentWordOption) {
-      setResult("Correct!");
-    } else {
-      setResult(`Incorrect. The correct answer was "${currentWordOption}".`);
-    }
-  }
-
-  function handleNext() {
+  const handleNext = () => {
     generateQuestion();
     setSelectedAnswer(null);
     setResult(null);
-  }
+  };
 
   const isAnswered = result && !result.includes("Please select");
 
@@ -90,7 +106,7 @@ useEffect(() => {
       </header>
       <div className="game-container second-color">
         <div className="question">
-          What is the Croatian translation for the word <strong>{currentWordQuestion}</strong>?
+          What is the Croatian translation for the word <strong>{currentQuestion}</strong>?
         </div>
 
         <ul className="answers">
@@ -124,7 +140,7 @@ useEffect(() => {
           </button>
         </div>
 
-        {<div className="result">{result}</div>}
+        {result && <div className="result">{result}</div>}
       </div>
     </div>
   );

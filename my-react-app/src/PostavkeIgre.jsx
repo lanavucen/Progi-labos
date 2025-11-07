@@ -36,7 +36,6 @@ function PostavkeIgre() {
       });
     };
 
-    console.log(languages);
   return (
 
     <div className="containerPostavkeIgre">

@@ -179,9 +179,53 @@ app.delete("/api/languages/:id", async (req, res) => {
 
 app.get("/api/words", async (req, res) => {
   try {
-    const { language_id } = req.query;
-    const words = await pool.query("SELECT * FROM words WHERE language_id = $1 ORDER BY word_text", [language_id]);
-    res.json(words.rows);
+    const { language_id, mod, word_id } = req.query;
+    let words;
+    if(!word_id){
+      if(mod == "mod1"){
+        words = await pool.query("SELECT word_id, word_text FROM words WHERE language_id = $1 ORDER BY word_text", [language_id]);
+      } else if (mod == "mod2"){
+        words = await pool.query("SELECT word_id, translation_to_croatian FROM words WHERE language_id = $1 ORDER BY word_text", [language_id]);
+      } else {
+        words = await pool.query("SELECT * FROM words WHERE language_id = $1 ORDER BY word_text", [language_id]);
+      }
+      res.json(words.rows);
+    } else{
+      if (mod == "mod1") {
+        const targetWordRes = await pool.query("SELECT translation_to_croatian FROM words WHERE language_id = $1 AND word_id = $2", [language_id, word_id]);
+        const targetWord = targetWordRes.rows[0];
+        const potentialDistractorsRes = await pool.query("SELECT translation_to_croatian FROM words WHERE language_id = $1 AND word_id != $2", [language_id, word_id]);
+        const distractors = potentialDistractorsRes.rows.sort(() => Math.random() - 0.5).slice(0, 3);
+        const choicesRandom = [...distractors.map(d => d.translation_to_croatian), targetWord.translation_to_croatian].sort(() => Math.random() - 0.5);
+        res.json(choicesRandom );
+      }else {
+        const targetWordRes = await pool.query("SELECT word_text FROM words WHERE language_id = $1 AND word_id = $2", [language_id, word_id]);
+        const targetWord = targetWordRes.rows[0];
+        const potentialDistractorsRes = await pool.query("SELECT word_text FROM words WHERE language_id = $1 AND word_id != $2", [language_id, word_id]);
+        const distractors = potentialDistractorsRes.rows.sort(() => Math.random() - 0.5).slice(0, 3);
+        const choicesRandom = [...distractors.map(d => d.word_text), targetWord.word_text].sort(() => Math.random() - 0.5);
+        res.json(choicesRandom);
+      }
+    }
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+});
+
+
+app.get("/api/words/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { language_id, mod} = req.query;
+    const word = await pool.query("SELECT * FROM words WHERE language_id = $1 AND word_id = $2", [language_id, id]);
+    let ans;
+    if(mod == "mod1"){
+      ans = word.rows[0].translation_to_croatian
+    } else{
+      ans = word.rows[0].word_text
+    }
+    res.json(ans);
+    
   } catch (err) {
     res.status(500).json(err.message);
   }
