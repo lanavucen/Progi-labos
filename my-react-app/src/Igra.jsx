@@ -43,7 +43,7 @@ export default function Igra() {
   return (
     <div className="game">
       <header>
-        <button className="third-color back" onClick={() => navigate("/")}>Go Back</button>
+        <button className="third-color back" onClick={() => navigate(-1)}>Go Back</button>
       </header>
       <div className="game-container second-color">
         <div className="question">

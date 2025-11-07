@@ -53,7 +53,7 @@ body {
 .question{
     font-size: 24px;
     color: black;
-    height: 3vh;
+    height: max(3vh, 50px);
 }
 
 .answer:hover, .submit-button:hover {

@@ -1,110 +1,208 @@
-
 html, body, #root {
     height: 100%;
     width: 100%;
-}
-body{
-    background: #e6deb9;
-    background:linear-gradient(
-        to right,
-        rgb(229, 220, 136),
-        #e6deb9,
-        rgb(229, 220, 136)
-        
-    );
-    
     margin: 0;
+    padding: 0;
 }
-.containerprofil{
-    background-color: white;
+
+body {
+    background: linear-gradient(to right, rgb(229, 220, 136), #e6deb9, rgb(229, 220, 136));
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    overflow: hidden;
+}
+
+.containerprofil {
+    background-color: #fff;
     border-radius: 20px;
     display: flex;
     flex-direction: column;
-    margin: 0;
-    position: fixed;
-    top: 1%;
-    left: 1%;
-    right: 1%;
-    bottom: 1%;
-    height: 98%; 
-    width: 98%;
-    border: 1px solid black; 
+    margin: 1.5% auto;
+    width: 90%;
+    height: 95vh;
+    border: 1px solid #000;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
 }
-.headerprofila{
-    border: 1px solid black;
-    background-color: rgb(235, 234, 234);
-    border-radius: 20px;
+
+.headerprofila {
+    border: 1px solid #000;
+    background-color: #f3f3f3;
+    border-radius: 15px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between; /* naslov lijevo, gumb desno */
+    justify-content: space-between;
     align-items: center;
+    padding: 0 2em;
+    height: 15%;
+    min-height: 100px;
+    flex-shrink: 0;
 }
-.headerprofila h1{
-    font-size: 4em;
-    margin-left: 1em;
-    
+
+.headerprofila h1 {
+    font-size: 2.3em;
+    margin: 0;
 }
-.dno{
+
+.role-display {
+    font-size: 0.6em;
+    color: #666;
+}
+
+.gumbi {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.buttonpocetna, .buttonigraj {
+    width: 10em;
+    height: 3em;
+    border: 1px solid #000;
+    cursor: pointer;
+    background-color: #ffedc7;
+    font-size: 1em;
+    border-radius: 20px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.buttonpocetna:hover, .buttonigraj:hover {
+    transform: scale(1.08);
+    background-color: #ffe3a6;
+}
+
+.dno {
     display: flex;
     flex-direction: row;
-    gap: 2em;
-    
-}
-.lista{
+    justify-content: space-between;
+    gap: 1.5em;
     flex: 1;
-    width: 30%;
-    height: 100%;
+    padding: 1.5em;
+    overflow-y: auto;
 }
-.kategorija{
-    border: 1px solid black;
-    margin-left: 2em;
-    width: 10em;
-    height: 1.5em;
+
+.lista {
+    flex: 0 0 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.kategorija {
+    border: 1px solid #000;
+    width: 85%;
+    height: 2.5em;
     text-align: left;
     padding-left: 1em;
-}
-.odlomak{
-    flex: 2;
-    width: 50%;
-    margin-left: 3em;
-    border: 1px solid black;
-    opacity: 0;
-}
-.gumbi{
     display: flex;
-    flex-direction: column;
-}
-.buttonpocetna{
-    margin-bottom: 1em;
-    margin-right: 1em;
-    width: 10em;
-    height: 3em;
-    border: 1px solid black;
-    cursor: pointer;
-    background-color: #ffedc7;
+    align-items: center;
+    border-radius: 10px;
+    background-color: #fafafa;
+    transition: all 0.2s ease;
     font-size: 1em;
-    border-radius: 20px;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-    
+}
 
+.kategorija:hover {
+    background-color: #ffe9b3;
+    transform: scale(1.03);
 }
-.buttonpocetna:hover{
-    transform: scale(1.05);
-}
-.buttonigraj{
-    margin-right: 1em;
-    width: 10em;
-    height: 3em;
-    border: 1px solid black;
-    cursor: pointer;
-    background-color: #ffedc7;
+
+.odlomak {
+    flex: 0 0 60%;
+    border: 1px solid #000;
+    border-radius: 10px;
+    padding: 1.2em;
+    background-color: #fffbea;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     font-size: 1em;
-    border-radius: 20px;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-}
-.buttonigraj:hover{
-    transform: scale(1.05);
+    overflow-y: auto;
+    max-height: 70vh;
 }
 
+.admin-link {
+    color: #007bff;
+    font-weight: 600;
+}
 
+.main-admin-link {
+    color: #c41e3a;
+    font-weight: 600;
+}
 
+@media (max-width: 1000px) {
+    .containerprofil {
+        width: 95%;
+        height: 95vh;
+    }
+
+    .headerprofila {
+        flex-direction: column;
+        align-items: center;
+        height: auto;
+        padding: 1em;
+        text-align: center;
+    }
+
+    .headerprofila h1 {
+        font-size: 2em;
+    }
+
+    .gumbi {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .dno {
+        flex-direction: column;
+        gap: 1em;
+        overflow-y: auto;
+        height: 100%;
+    }
+
+    .lista {
+        flex: none;
+        width: 100%;
+        align-items: center;
+    }
+
+    .kategorija {
+        width: 80%;
+    }
+
+    .odlomak {
+        flex: none;
+        width: 100%;
+        max-height: none;
+        height: auto;
+        padding: 1.5em;
+    }
+}
+
+@media (max-width: 600px) {
+    .containerprofil {
+        width: 96%;
+        border-radius: 10px;
+        height: 95vh;
+    }
+
+    .headerprofila h1 {
+        font-size: 1.6em;
+    }
+
+    .kategorija {
+        font-size: 0.9em;
+        height: auto;
+        padding: 0.5em 1em;
+    }
+
+    .buttonpocetna, .buttonigraj {
+        width: 8em;
+        height: 2.5em;
+        font-size: 0.9em;
+    }
+
+    .odlomak {
+        font-size: 0.95em;
+        padding: 1em;
+    }
+}
