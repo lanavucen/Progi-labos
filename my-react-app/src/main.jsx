@@ -10,6 +10,7 @@ import Profil from "./Profil";
 import Igra from "./Igra";
 import PostavkeRjecnika from "./PostavkeRjecnika";
 import UpravljanjeUlogama from "./UpravljanjeUlogama";
+import PostavkeIgre from "./PostavkeIgre.jsx";
 
 const router=createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router=createBrowserRouter([
   {
     path:'/UpravljanjeUlogama',
     element:<UpravljanjeUlogama/>
+  },
+  {
+    path:'/PostavkeIgre',
+    element:<PostavkeIgre/>
   }
 ]);
 
