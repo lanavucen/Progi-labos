@@ -1,12 +1,13 @@
 import "./css/PostavkeIgre.css";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function PostavkeIgre() {
     const navigate = useNavigate();
 
     const [selectedMod, setSelectedMod] = useState("mod1");
     const [selectedRjecnik, setSelectedRjecnik] = useState("1");
+    const [languages, setLanguages] = useState([]);
 
     const handleModChange = (event) => {
     setSelectedMod(event.target.value); 
@@ -16,13 +17,26 @@ function PostavkeIgre() {
         setSelectedRjecnik(event.target.value); 
     }
 
-    const handleSubmitPostavke = (e) => {
+    const fetchLanguages = async () => {
+    try {
+      const response = await fetch('/api/languages');
+      const data = await response.json();
+      setLanguages(data);
+    } catch (err) { console.error("Greška pri dohvaćanju jezika:", err); }
+    };
+
+    useEffect(() => {
+      fetchLanguages();
+    }, []);
+
+    const handleSubmitPostavkeIgre = (e) => {
       e.preventDefault();
       navigate("/igra", {
         state: { mod: selectedMod, rjecnik: selectedRjecnik }
       });
     };
 
+    console.log(languages);
   return (
 
     <div className="containerPostavkeIgre">
@@ -36,14 +50,16 @@ function PostavkeIgre() {
         </select>
 
       <p className="paragraphsPostavke">Odaberi rječnik:</p>
-      <select className="dropdown" value={selectedRjecnik} onChange={handleRjecnikChange}> 
-            <option value="1">rj1</option>
-            <option value="2">rj2</option>
-            <option value="3">rj3</option>
-            <option value="4">rj4</option>
-        </select>
+      <select className="dropdown" value={selectedRjecnik} onChange={handleRjecnikChange}>
+      {languages.map((rj) => (
+        <option key={rj.language_id} value={rj.language_id}>
+          {rj.language_name}
+        </option>
+      ))}
+      </select>
+
         
-      <button className="submitbutton" onClick={handleSubmitPostavke}>
+      <button className="submitbutton" onClick={handleSubmitPostavkeIgre}>
         Igraj
       </button>
     </div>
