@@ -1,4 +1,5 @@
-import "./css/Profil.css";
+import styles from "./css/Profil.module.css";
+import "./css/global.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -54,35 +55,35 @@ function Profil() {
   const isMainAdmin = user && user.role === 2;
 
   return (
-    <div className="containerprofil">
-      <div className="headerprofila">
+    <div className={styles.containerprofil}>
+      <div className={styles.headerprofila}>
         <h1>
           Bok, {user.name} 
           <span className="role-display"> ({isMainAdmin ? "Glavni Admin" : isAdmin ? "Admin" : "Korisnik"})</span>
         </h1>
-        <div className="gumbi">
-          <button className="buttonpocetna" onClick={() => navigate("/")}>
+        <div className={styles.gumbi}>
+          <button className={styles.buttonpocetna} onClick={() => navigate("/")}>
             Pocetna
           </button>
-          <button className="buttonigraj" onClick={() => navigate("/PostavkeIgre")}>
+          <button className={styles.buttonigraj} onClick={() => navigate("/PostavkeIgre")}>
             Igraj
           </button>
         </div>
       </div>
-      <div className="dno">
-        <div className="lista">
-          <p className="kategorija">Podatci</p>
-          <p className="kategorija">Statistika</p>
+      <div className={styles.dno}>
+        <div className={styles.lista}>
+          <p className={styles.kategorija}>Podatci</p>
+          <p className={styles.kategorija}>Statistika</p>
           <p
-            className="kategorija"
+            className={styles.kategorija}
             onClick={() => setIsChangePasswordVisible(!isChangePasswordVisible)}
             style={{ cursor: "pointer" }}>
             Promjena lozinke
           </p>
-          <p className="kategorija" onClick={handleDeleteAccount} style={{ cursor: "pointer", color: "red" }}>
+          <p className={styles.kategorija} onClick={handleDeleteAccount} style={{ cursor: "pointer", color: "red" }}>
             Brisanje profila
           </p>
-          <p className="kategorija" onClick={handleLogout} style={{ cursor: "pointer" }}>
+          <p className={styles.kategorija} onClick={handleLogout} style={{ cursor: "pointer" }}>
             Odjavi se
           </p>
 
@@ -108,7 +109,7 @@ function Profil() {
             </p>
           )}
         </div>
-        <div className="odlomak">
+        <div className={styles.odlomak}>
           <p>Ovdje možete vidjeti svoje podatke.</p>
           <p>Email: {user.email}</p>
         </div>

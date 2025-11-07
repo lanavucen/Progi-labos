@@ -1,25 +1,12 @@
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-body {
+.game {
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
-#root {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.game-container {
+.gameContainer {
   border-radius: 0.5vh;
   height: 60vh;
   width: max(70vw, 470px);
@@ -39,7 +26,8 @@ body {
   justify-items: center;
 }
 
-.answer, .submit-button {
+.answer,
+.submitButton {
   background-color: #eee;
   padding: 1.5vh 3vw;
   border-radius: 1vh;
@@ -50,35 +38,41 @@ body {
   width: max(13vw, 100px);
 }
 
-.question{
-    font-size: 24px;
-    color: black;
-    height: max(3vh, 50px);
+.question {
+  font-size: 24px;
+  color: black;
+  height: max(3vh, 50px);
 }
 
-.answer:hover, .submit-button:hover {
+.answer:hover,
+.submitButton:hover {
   background-color: rgb(255, 140, 0);
 }
 
-.answer.selected {
+.firstColor {
+  background: #feffdf;
+}
+
+.secondColor {
+  background: #ffe79a;
+}
+
+.thirdColor {
+  background: #ffa952;
+}
+
+.fourthColor {
+  background: #ef5a5a;
+}
+
+
+.selected {
   background-color: #ef5a5a;
   color: white;
 }
 
-.first-color { 
-	background: #feffdf; 
-}
-	
-.second-color { 
-	background: #ffe79a; 
-}
-
-.third-color { 
-	background: #ffa952; 
-}
-
-.fourth-color { 
-	background: #ef5a5a; 
+.selected:hover {
+  background-color: #ef5a5a;
 }
 
 .back {
@@ -86,10 +80,13 @@ body {
   width: max(13vh, 90px);
   height: max(5vh, 30px);
   font-size: 1.2em;
+  position: absolute;
+  left: 0vh;
+  top: 20vh;
 }
 
-.result{
-    color: black;
-    height: 0.5vh;
-    font-size: 1.2em;
+.result {
+  color: black;
+  height: 0.5vh;
+  font-size: 1.2em;
 }

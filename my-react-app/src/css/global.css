@@ -1,0 +1,23 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    rgb(229, 220, 136),
+    #e6deb9,
+    rgb(229, 220, 136)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

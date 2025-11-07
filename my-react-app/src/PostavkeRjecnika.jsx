@@ -1,4 +1,5 @@
-import "./css/PostavkeRjecnika.css";
+import styles from "./css/PostavkeRjecnika.module.css";
+import "./css/global.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -90,17 +91,17 @@ function PostavkeRjecnika() {
   );
 
   return (
-    <div className="containerPR">
-      <h1 className="headerPR">Postavke riječnika</h1>
-      <button className="Button" style={{ position: 'absolute', top: '0px', left: '0px' }} onClick={() => navigate(-1)}>Natrag</button>
+    <div className={styles.containerPR}>
+      <h1 className={styles.headerPR}>Postavke riječnika</h1>
+      <button className={styles.Button} style={{ position: 'absolute', top: '0px', left: '0px' }} onClick={() => navigate(-1)}>Natrag</button>
       
-      <div className="PR">
-        <p className="naslovPR">Upravljanje jezicima:</p>
-        <div className="info">
+      <div className={styles.PR}>
+        <p className={styles.naslovPR}>Upravljanje jezicima:</p>
+        <div className={styles.info}>
           <p>Dodaj novi jezik:</p>
           <input type="text" value={newLanguageName} onChange={e => setNewLanguageName(e.target.value)} placeholder="Npr. Francuski" />
         </div>
-        <button className="Button" onClick={handleAddLanguage_func}>Dodaj jezik</button>
+        <button className={styles.Button} onClick={handleAddLanguage_func}>Dodaj jezik</button>
         <ul className="word-list">
           {languages.map(lang => (
             <li key={lang.language_id} className="word-list-item">
@@ -114,7 +115,7 @@ function PostavkeRjecnika() {
         
         <hr />
 
-        <p className="naslovPR">Odaberi jezik za rad:</p>
+        <p className={styles.naslovPR}>Odaberi jezik za rad:</p>
         <select className="language-select" value={selectedLanguageId} onChange={e => setSelectedLanguageId(e.target.value)}>
           <option value="">-- Odaberi --</option>
           {languages.map(lang => <option key={lang.language_id} value={lang.language_id}>{lang.language_name}</option>)}
@@ -122,24 +123,24 @@ function PostavkeRjecnika() {
 
         {selectedLanguageId && !editingWord && (
           <>
-            <p className="naslovPR">Dodavanje riječi:</p>
-            <div className="info">
+            <p className={styles.naslovPR}>Dodavanje riječi:</p>
+            <div className={styles.info}>
               <p>Upiši riječ:</p>
               <input type="text" value={newWord.text} onChange={e => setNewWord({...newWord, text: e.target.value})} />
             </div>
-            <div className="info">
+            <div className={styles.info}>
               <p>Upiši prijevod riječi:</p>
               <input type="text" value={newWord.translation} onChange={e => setNewWord({...newWord, translation: e.target.value})} />
             </div>
-            <div className="info">
+            <div className={styles.info}>
               <p>Upiši frazu s kontekstom (odvojeno zarezom):</p>
               <input type="text" value={newWord.phrases} onChange={e => setNewWord({...newWord, phrases: e.target.value})} />
             </div>
-            <button className="Button" onClick={handleAddWord_func}>Dodaj riječ</button>
+            <button className={styles.Button} onClick={handleAddWord_func}>Dodaj riječ</button>
 
-            <p className="naslovPR">Postojeće riječi:</p>
+            <p className={styles.naslovPR}>Postojeće riječi:</p>
             
-            <div className="info">
+            <div className={styles.info}>
               <p>Pretraži riječi:</p>
               <input 
                 type="text" 
@@ -154,8 +155,8 @@ function PostavkeRjecnika() {
                 <li key={word.word_id} className="word-list-item">
                   <span>{word.word_text} -{">"} {word.translation_to_croatian}</span>
                   <div className="word-actions">
-                    <button className="gumb_uloga izmijeni" onClick={() => handleEditWord_func(word)}>Izmijeni</button>
-                    <button className="gumb_uloga democija" onClick={() => handleDeleteWord_func(word.word_id)}>Obriši</button>
+                    <button className={`${styles.gumb_uloga} ${styles.izmijeni}`} onClick={() => handleEditWord_func(word)}>Izmijeni</button>
+                    <button className={`${styles.gumb_uloga} ${styles.democija}`} onClick={() => handleDeleteWord_func(word.word_id)}>Obriši</button>
                   </div>
                 </li>
               ))}
@@ -165,21 +166,21 @@ function PostavkeRjecnika() {
         
         {editingWord && (
           <div className="editing-section">
-            <p className="naslovPR">Izmjena riječi:</p>
-            <div className="info">
+            <p className={styles.naslovPR}>Izmjena riječi:</p>
+            <div className={styles.info}>
               <p>Riječ:</p>
               <input type="text" value={editingWord.word_text} onChange={e => setEditingWord({...editingWord, word_text: e.target.value})} />
             </div>
-            <div className="info">
+            <div className={styles.info}>
               <p>Prijevod:</p>
               <input type="text" value={editingWord.translation_to_croatian} onChange={e => setEditingWord({...editingWord, translation_to_croatian: e.target.value})} />
             </div>
-            <div className="info">
+            <div className={styles.info}>
               <p>Fraze (odvojeno zarezom):</p>
               <input type="text" value={editingWord.phrases} onChange={e => setEditingWord({...editingWord, phrases: e.target.value})} />
             </div>
-            <button className="Button" onClick={handleUpdateWord_func}>Spremi promjene</button>
-            <button className="Button" onClick={() => setEditingWord(null)}>Odustani</button>
+            <button className={styles.Button} onClick={handleUpdateWord_func}>Spremi promjene</button>
+            <button className={styles.Button} onClick={() => setEditingWord(null)}>Odustani</button>
           </div>
         )}
       </div>

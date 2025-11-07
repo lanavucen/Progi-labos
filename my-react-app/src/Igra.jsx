@@ -1,6 +1,7 @@
-import "./css/Igra.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import styles from "./css/Igra.module.css";
+import "./css/global.css";
 
 export default function Igra() {
   const navigate = useNavigate();
@@ -70,26 +71,24 @@ export default function Igra() {
     if (currentWord && rjecnik) fetchChoices(rjecnik, currentWord.word_id);
   }, [currentWord, rjecnik]);
 
- const handleSubmit = async () => {
-  if (!selectedAnswer) {
-    setResult("Please select an answer first!");
-    return;
-  }
-  try {
-    const res = await fetch(`/api/words/${currentWord.word_id}?language_id=${rjecnik}&mod=${mod}`);
-    const correctAnswer = await res.json(); 
-
-    if (selectedAnswer === correctAnswer) {
-      setResult("Correct!");
-    } else {
-      setResult(`Incorrect. The correct answer was "${correctAnswer}".`);
+  const handleSubmit = async () => {
+    if (!selectedAnswer) {
+      setResult("Please select an answer first!");
+      return;
     }
-  } catch (err) {
-    console.error("Greška pri dohvaćanju odgovora:", err);
-    setResult("Error fetching the answer. Try again.");
-  }
-};
-
+    try {
+      const res = await fetch(`/api/words/${currentWord.word_id}?language_id=${rjecnik}&mod=${mod}`);
+      const correctAnswer = await res.json();
+      if (selectedAnswer === correctAnswer) {
+        setResult("Correct!");
+      } else {
+        setResult(`Incorrect. The correct answer was "${correctAnswer}".`);
+      }
+    } catch (err) {
+      console.error("Greška pri dohvaćanju odgovora:", err);
+      setResult("Error fetching the answer. Try again.");
+    }
+  };
 
   const handleNext = () => {
     generateQuestion();
@@ -100,20 +99,23 @@ export default function Igra() {
   const isAnswered = result && !result.includes("Please select");
 
   return (
-    <div className="game">
-      <header>
-        <button className="third-color back" onClick={() => navigate(-1)}>Go Back</button>
-      </header>
-      <div className="game-container second-color">
-        <div className="question">
+    <div className={styles.game}>
+        <button className={`${styles.thirdColor} ${styles.back}`} onClick={() => navigate(-1)}>
+          Go Back
+        </button>
+
+      <div className={`${styles.gameContainer} ${styles.secondColor}`}>
+        <div className={styles.question}>
           What is the Croatian translation for the word <strong>{currentQuestion}</strong>?
         </div>
 
-        <ul className="answers">
+        <ul className={styles.answers}>
           {choices?.map((ans, index) => (
             <li
               key={index}
-              className={`answer third-color ${selectedAnswer === ans ? "selected" : ""}`}
+              className={`${styles.answer} ${styles.thirdColor} ${
+                selectedAnswer === ans ? styles.selected : ""
+              }`}
               onClick={() => !isAnswered && setSelectedAnswer(ans)}
             >
               {ans}
@@ -121,9 +123,9 @@ export default function Igra() {
           ))}
         </ul>
 
-        <div className="buttons">
+        <div className={styles.buttons}>
           <button
-            className="submit-button third-color"
+            className={`${styles.submitButton} ${styles.thirdColor}`}
             onClick={handleSubmit}
             disabled={isAnswered}
           >
@@ -132,7 +134,7 @@ export default function Igra() {
 
           <button
             id="next"
-            className="submit-button third-color next-button"
+            className={`${styles.submitButton} ${styles.thirdColor}`}
             onClick={handleNext}
             disabled={!isAnswered}
           >
@@ -140,7 +142,7 @@ export default function Igra() {
           </button>
         </div>
 
-        {result && <div className="result">{result}</div>}
+        {result && <div className={styles.result}>{result}</div>}
       </div>
     </div>
   );

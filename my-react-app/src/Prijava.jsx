@@ -1,4 +1,5 @@
-import "./css/Prijava.css";
+import styles from "./css/Prijava.module.css";
+import "./css/global.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -39,24 +40,24 @@ function Prijava() {
   };
 
   return (
-    <div className="containerprijava">
-      <h1 className="headerprijava">APLIKACIJA</h1>
+    <div className={styles.containerprijava}>
+      <h1 className={styles.headerprijava}>APLIKACIJA</h1>
       <p>Nemaš račun? </p>
       <p>Registriraj se besplatno</p>
-      <button className="signinbutton" onClick={() => navigate("/Registracija")}>
+      <button className={styles.signinbutton} onClick={() => navigate("/Registracija")}>
         Sign up
       </button>
       <p>Imaš račun? Prijavi se</p>
 
       <input
-        className="podatci"
+        className={styles.podatci}
         type="email"
         placeholder="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
       <input
-        className="podatci"
+        className={styles.podatci}
         type="password"
         placeholder="Password"
         value={password}
@@ -65,7 +66,7 @@ function Prijava() {
 
       {error && <p className="error-message">{error}</p>}
 
-      <button className="submitbutton" onClick={handleSubmit}>
+      <button className={styles.submitbutton} onClick={handleSubmit}>
         Submit
       </button>
     </div>

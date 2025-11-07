@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./css/UpravljanjeUlogama.css"; 
+import styles from "./css/UpravljanjeUlogama.module.css";
+import "./css/global.css";
 
 function UpravljanjeUlogama() {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ function UpravljanjeUlogama() {
   };
 
   if (error) {
-    return <div className="containerPR"><p>{error}</p></div>;
+    return <div className={styles.containerPR}><p>{error}</p></div>;
   }
   
   if (!currentUser) {
@@ -74,12 +75,12 @@ function UpravljanjeUlogama() {
   }
 
   return (
-    <div className="containerPR">
+    <div className={styles.containerPR}>
       <button className="natrag-button" onClick={() => navigate(-1)}>
         Natrag
       </button>
-      <h1 className="headerPR">Upravljanje Ulogama</h1>
-      <div className="PR">
+      <h1 className={styles.headerPR}>Upravljanje Ulogama</h1>
+      <div className={styles.PR}>
         <table className="user-table">
           <thead>
             <tr>
@@ -99,12 +100,12 @@ function UpravljanjeUlogama() {
                   {currentUser.email !== user.email && (
                     <>
                       {user.role === 0 && (
-                        <button className="gumb_uloga promocija" onClick={() => handleChangeRole(user.email, 1)}>
+                        <button className={`${styles.gumb_uloga} ${styles.promocija}`} onClick={() => handleChangeRole(user.email, 1)}>
                           Postavi za Admina
                         </button>
                       )}
                       {user.role === 1 && (
-                        <button className="gumb_uloga democija" onClick={() => handleChangeRole(user.email, 0)}>
+                        <button className={`${styles.gumb_uloga} ${styles.democija}`} onClick={() => handleChangeRole(user.email, 0)}>
                           Ukloni Admina
                         </button>
                       )}

@@ -1,4 +1,5 @@
-import "./css/Registracija.css";
+import styles from "./css/Registracija.module.css";
+import "./css/global.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -63,14 +64,14 @@ function Registracija() {
   };
 
   return (
-    <div className="containerprijava">
-      <h1 className="headerprijava">APLIKACIJA</h1>
+    <div className={styles.containerprijava}>
+      <h1 className={styles.headerprijava}>APLIKACIJA</h1>
 
-      <input className="podatci" type="text" placeholder="Ime" value={name} onChange={(e) => setName(e.target.value)} />
+      <input className={styles.podatci} type="text" placeholder="Ime" value={name} onChange={(e) => setName(e.target.value)} />
       {errors.name && <p className="error-message">{errors.name}</p>}
 
       <input
-        className="podatci"
+        className={styles.podatci}
         type="email"
         placeholder="email"
         value={email}
@@ -79,7 +80,7 @@ function Registracija() {
       {errors.email && <p className="error-message">{errors.email}</p>}
 
       <input
-        className="podatci"
+        className={styles.podatci}
         type="password"
         placeholder="Password"
         value={password}
@@ -87,14 +88,14 @@ function Registracija() {
       />
       {errors.password && <p className="error-message">{errors.password}</p>}
 
-      <button className="submitbutton" onClick={handleSubmit}>
+      <button className={styles.submitbutton} onClick={handleSubmit}>
         Submit
       </button>
 
       {errors.server && <p className="error-message">{errors.server}</p>}
 
       <p>Ipak imaš račun? </p>
-      <button className="prijavisebutton" onClick={() => navigate("/Prijava")}>
+      <button className={styles.prijavisebutton} onClick={() => navigate("/Prijava")}>
         Sign in
       </button>
     </div>

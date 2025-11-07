@@ -1,4 +1,5 @@
-import "./css/PostavkeIgre.css";
+import styles from "./css/PostavkeIgre.module.css";
+import "./css/global.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -50,10 +51,10 @@ function PostavkeIgre() {
     };
 
     return (
-        <div className="containerPostavkeIgre">
-            <h1 className="headerPostavkeIgre">Postavke igre</h1>
-            <p className="paragraphsPostavke">Odaberi mod učenja:</p>
-            <select className="dropdown" value={selectedMod} onChange={handleModChange}> 
+        <div className={styles.containerPostavkeIgre}>
+            <h1 className={styles.headerPostavkeIgre}>Postavke igre</h1>
+            <p className={styles.paragraphsPostavke}>Odaberi mod učenja:</p>
+            <select className={styles.dropdown} value={selectedMod} onChange={handleModChange}> 
                 <option value="">Odaberite mod</option>
                 <option value="mod1">Engleska riječ → Hrvatski prijevod</option>
                 <option value="mod2">Hrvatska riječ → Engleski prijevod</option>
@@ -61,8 +62,8 @@ function PostavkeIgre() {
                 <option value="mod4">Engleska riječ → Izgovor</option>
             </select>
 
-            <p className="paragraphsPostavke">Odaberi rječnik:</p>
-            <select className="dropdown" value={selectedRjecnik} onChange={handleRjecnikChange}>
+            <p className={styles.paragraphsPostavke}>Odaberi rječnik:</p>
+            <select className={styles.dropdown} value={selectedRjecnik} onChange={handleRjecnikChange}>
                 <option value="">Odaberite rječnik</option>
                 {languages.map((rj) => (
                     <option key={rj.language_id} value={rj.language_id}>
@@ -71,9 +72,9 @@ function PostavkeIgre() {
                 ))}
             </select>
 
-            {error && <p className="error">{error}</p>}
+            {error && <p className={styles.error}>{error}</p>}
 
-            <button className="submitbutton" onClick={handleSubmitPostavkeIgre}>
+            <button className={styles.submitbutton} onClick={handleSubmitPostavkeIgre}>
                 Igraj
             </button>
         </div>

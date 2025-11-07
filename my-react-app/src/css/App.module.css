@@ -1,16 +1,4 @@
 
-body{
-    background: #e6deb9;
-    background:linear-gradient(
-        to right,
-        rgb(229, 220, 136),
-        #e6deb9,
-        rgb(229, 220, 136)
-        
-    );
-    
-    margin: 0;
-}
 .container{
     display: flex;
     flex-direction: column;
