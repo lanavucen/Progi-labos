@@ -5,40 +5,45 @@ import { useState } from "react";
 function PostavkeIgre() {
     const navigate = useNavigate();
 
-    const [selectedMod, setSelectedMod] = useState("");
-    const [selectedRjecnik, setSelectedRjecnik] = useState("");
+    const [selectedMod, setSelectedMod] = useState("mod1");
+    const [selectedRjecnik, setSelectedRjecnik] = useState("1");
 
     const handleModChange = (event) => {
     setSelectedMod(event.target.value); 
-    console.log(event.target.value)
     }
 
     const handleRjecnikChange = (event) => {
         setSelectedRjecnik(event.target.value); 
-        console.log(event.target.value)
     }
 
+    const handleSubmitPostavke = (e) => {
+      e.preventDefault();
+      navigate("/igra", {
+        state: { mod: selectedMod, rjecnik: selectedRjecnik }
+      });
+    };
+
   return (
-    // imnena u dropdownu - trenutno placeholderi
+
     <div className="containerPostavkeIgre">
         <h1 className="headerPostavkeIgre">Postavke igre</h1>
         <p className="paragraphsPostavke">Odaberi mod učenja:</p>
         <select className="dropdown" value={selectedMod} onChange={handleModChange}> 
-            <option value="mod1">mod1</option>
-            <option value="mod2">mod2</option>
-            <option value="mod3">mod3</option>
-            <option value="mod4">mod4</option>
+            <option value="mod1">Engleska riječ → Hrvatski prijevod</option>
+            <option value="mod2">Hrvatska riječ → Engleski prijevod</option>
+            <option value="mod3">Izgovor → Pisanje riječi</option>
+            <option value="mod4">Engleska riječ → Izgovor</option>
         </select>
 
       <p className="paragraphsPostavke">Odaberi rječnik:</p>
       <select className="dropdown" value={selectedRjecnik} onChange={handleRjecnikChange}> 
-            <option value="rj1">rj1</option>
-            <option value="rj2">rj2</option>
-            <option value="rj3">rj3</option>
-            <option value="rj4">rj4</option>
+            <option value="1">rj1</option>
+            <option value="2">rj2</option>
+            <option value="3">rj3</option>
+            <option value="4">rj4</option>
         </select>
         
-      <button className="submitbutton" onClick={() => navigate("/Igra")}>
+      <button className="submitbutton" onClick={handleSubmitPostavke}>
         Igraj
       </button>
     </div>

@@ -1,22 +1,66 @@
 import "./css/Igra.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function Igra() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { mod, rjecnik } = location.state || {};
+  const [words, setWords] = useState([]);
+  const [currentWordOption, setCurrentWordOption] = useState(null); 
+  const [currentWordQuestion, setCurrentWordQuestion] = useState(null); 
+  const [choices, setChoices] = useState([]); 
 
-  const wordData = [
-    { word: "adjust", answers: ["adapt", "change", "refuse", "ignore"], correct: "adapt" },
-    { word: "decline", answers: ["refuse", "accept", "rise", "agree"], correct: "refuse" },
-    { word: "indirect", answers: ["roundabout", "straight", "clear", "simple"], correct: "roundabout" },
-    { word: "valid", answers: ["correct", "false", "wrong", "fake"], correct: "correct" },
-  ];
+  const fetchWords = async (langId) => {
+    if (!langId) {
+      setWords([]);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/words?language_id=${langId}`);
+      const data = await response.json();
+      setWords(data);
+    } catch (err) { console.error("Greška pri dohvaćanju riječi:", err); }
+  };
+
+useEffect(() => {
+  if (rjecnik) fetchWords(rjecnik);
+}, [rjecnik]);
+  
+
+const generateQuestion = () => {
+  const index = Math.floor(Math.random() * words.length);
+  const targetWord = words[index];
+  const potentialDistractors = words.filter(w => w.word_id !== targetWord.word_id);
+  const SortedPotentialDistractors = potentialDistractors.sort(() => Math.random() - 0.5);
+  const distractors = SortedPotentialDistractors.slice(0, 3);
+  if(mod == "mod1"){
+    const choicesRandom = [...distractors, targetWord].sort(() => Math.random() - 0.5).map(w => w.translation_to_croatian);
+    setCurrentWordQuestion(targetWord.word_text);
+    setCurrentWordOption(targetWord.translation_to_croatian);
+    setChoices(choicesRandom);
+
+  } else if(mod == "mod2"){
+    const choicesRandom = [...distractors, targetWord].sort(() => Math.random() - 0.5).map(w => w.word_text);
+    setCurrentWordQuestion(targetWord.translation_to_croatian);
+    setCurrentWordOption(targetWord.word_text);
+    setChoices(choicesRandom);
+  }
+};
+
+useEffect(() => {
+  if (words.length > 0) {
+    generateQuestion();
+  }
+}, [words]);
+
+
 
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [result, setResult] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const currentQuestion = wordData[currentIndex];
 
   function handleSubmit() {
     if (!selectedAnswer) {
@@ -24,16 +68,15 @@ export default function Igra() {
       return;
     }
 
-    if (selectedAnswer === currentQuestion.correct) {
+    if (selectedAnswer === currentWordOption) {
       setResult("Correct!");
     } else {
-      setResult(`Incorrect. The correct answer was "${currentQuestion.correct}".`);
+      setResult(`Incorrect. The correct answer was "${currentWordOption}".`);
     }
   }
 
   function handleNext() {
-    const nextIndex = (currentIndex + 1) % wordData.length;
-    setCurrentIndex(nextIndex);
+    generateQuestion();
     setSelectedAnswer(null);
     setResult(null);
   }
@@ -47,11 +90,11 @@ export default function Igra() {
       </header>
       <div className="game-container second-color">
         <div className="question">
-          What is a synonym for the word <strong>{currentQuestion.word}</strong>?
+          What is the Croatian translation for the word <strong>{currentWordQuestion}</strong>?
         </div>
 
         <ul className="answers">
-          {currentQuestion.answers.map((ans, index) => (
+          {choices?.map((ans, index) => (
             <li
               key={index}
               className={`answer third-color ${selectedAnswer === ans ? "selected" : ""}`}
