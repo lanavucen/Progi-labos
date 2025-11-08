@@ -1,12 +1,16 @@
 import "./css/Igra.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import rasporediPosude from "./Posude.jsx";
+
 
 export default function Igra() {
   const navigate = useNavigate();
   const location = useLocation();
   const { mod, rjecnik, smijeIgrat } = location.state || {};
 
+  const [user, setUser] = useState(null);
+  const [allWords, setAllWords] = useState([]);
   const [words, setWords] = useState([]);
   const [choices, setChoices] = useState([]);
   const [currentWord, setCurrentWord] = useState(null);
@@ -14,21 +18,44 @@ export default function Igra() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [result, setResult] = useState(null);
 
+
+ 
+  const raspored = useMemo(() => {
+    if (!rjecnik || !user) return null;
+    return new rasporediPosude(rjecnik, user.email);
+  }, [rjecnik, user]);
+
   useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+
     if (!mod || !rjecnik) {
       navigate("/postavkeIgre");
     }
+
   }, [mod, rjecnik, navigate]);
 
   const fetchWords = async (langId) => {
     if (!langId) {
-      setWords([]);
+      setAllWords([]);
       return;
     }
+    
     try {
       const response = await fetch(`/api/words?language_id=${langId}&mod=${mod}`);
       const data = await response.json();
-      setWords(data);
+      setAllWords(data);
+  
+      if (raspored && data.length > 0) {
+        const filtrirane = raspored.filtrirajRijeci(data);
+        setWords(filtrirane);
+      } else {
+        setWords([]);
+      }
+      
+
     } catch (err) {
       console.error("Greška pri dohvaćanju riječi:", err);
     }
@@ -49,7 +76,10 @@ export default function Igra() {
   };
 
   const generateQuestion = () => {
-    if (words.length === 0) return;
+    if (words.length === 0) {
+      setCurrentWord(null);
+      return;
+    }
     const index = Math.floor(Math.random() * words.length);
     const targetWord = words[index];
     setCurrentWord(targetWord);
@@ -57,11 +87,13 @@ export default function Igra() {
   };
 
   useEffect(() => {
-    if (rjecnik) fetchWords(rjecnik);
-  }, [rjecnik]);
+    if (rjecnik && raspored) {
+      fetchWords(rjecnik);
+    }
+  }, [rjecnik, raspored]);
 
   useEffect(() => {
-    if (words.length > 0) {
+    if (words.length > 0 && !currentWord) {
       generateQuestion();
     }
   }, [words]);
@@ -70,31 +102,39 @@ export default function Igra() {
     if (currentWord && rjecnik) fetchChoices(rjecnik, currentWord.word_id);
   }, [currentWord, rjecnik]);
 
- const handleSubmit = async () => {
-  if (!selectedAnswer) {
-    setResult("Please select an answer first!");
-    return;
-  }
-  try {
-    const res = await fetch(`/api/words/${currentWord.word_id}?language_id=${rjecnik}&mod=${mod}`);
-    const correctAnswer = await res.json(); 
 
-    if (selectedAnswer === correctAnswer) {
-      setResult("Correct!");
-    } else {
-      setResult(`Incorrect. The correct answer was "${correctAnswer}".`);
+  const handleSubmit = async () => {
+    if (!selectedAnswer) {
+      setResult("Please select an answer first!");
+      return;
     }
-  } catch (err) {
-    console.error("Greška pri dohvaćanju odgovora:", err);
-    setResult("Error fetching the answer. Try again.");
-  }
-};
+    
+    try {
+      const wordId = currentWord.word_id;
+      const res = await fetch(`/api/words/${wordId}?language_id=${rjecnik}&mod=${mod}`);
+      const correctAnswer = await res.json();
+      const isCorrect = selectedAnswer === correctAnswer;
+      const rezultat = raspored.obradi(wordId, isCorrect);
 
+      if (isCorrect) {
+        setResult(`Correct! "${rezultat.posuda}".`);
+      } else {
+        setResult(`Incorrect. The correct answer was "${correctAnswer}" "${rezultat.posuda}".`);
+      }
+      const filtrirane = raspored.filtrirajRijeci(allWords);
+      setWords(filtrirane);
+
+    } catch (err) {
+      console.error("Greška pri obradi odgovora:", err);
+      setResult("Error fetching the answer. Try again.");
+    }
+  };
 
   const handleNext = () => {
-    generateQuestion();
     setSelectedAnswer(null);
     setResult(null);
+    setCurrentWord(null);
+    generateQuestion();
   };
 
   const isAnswered = result && !result.includes("Please select");
@@ -102,45 +142,66 @@ export default function Igra() {
   return (
     <div className="game">
       <header>
-        <button className="third-color back" onClick={() => navigate(-1)}>Go Back</button>
+        <button className="third-color back" onClick={() => navigate(-1)}>
+          Natrag
+        </button>
       </header>
+
       <div className="game-container second-color">
-        <div className="question">
-          What is the Croatian translation for the word <strong>{currentQuestion}</strong>?
-        </div>
+        {currentWord ? (
+          <>
+            <div className="question">
+              {mod === "mod1" 
+                ? <>Što je hrvatski prijevod za riječ <strong>{currentQuestion}</strong>?</>
+                : <>Što je engleski prijevod za riječ <strong>{currentQuestion}</strong>?</>
+              }
+            </div>
 
-        <ul className="answers">
-          {choices?.map((ans, index) => (
-            <li
-              key={index}
-              className={`answer third-color ${selectedAnswer === ans ? "selected" : ""}`}
-              onClick={() => !isAnswered && setSelectedAnswer(ans)}
+            <ul className="answers">
+              {choices?.map((ans, index) => (
+                <li
+                  key={index}
+                  className={`answer third-color ${selectedAnswer === ans ? "selected" : ""}`}
+                  onClick={() => !isAnswered && setSelectedAnswer(ans)}
+                >
+                  {ans}
+                </li>
+              ))}
+            </ul>
+
+            <div className="buttons">
+              <button
+                className="submit-button third-color"
+                onClick={handleSubmit}
+                disabled={isAnswered}
+              >
+                Potvrdi
+              </button>
+
+              <button
+                id="next"
+                className="submit-button third-color next-button"
+                onClick={handleNext}
+                disabled={!isAnswered}
+              >
+                Sljedeće
+              </button>
+            </div>
+
+            {result && <div className="result">{result}</div>}
+          </>
+        ) : (
+          <div className="question">
+            <p>Gotovo za danas</p>
+            <button 
+              className="third-color" 
+              onClick={() => navigate("/postavkeIgre")}
+              style={{ marginTop: "20px", padding: "10px 20px" }}
             >
-              {ans}
-            </li>
-          ))}
-        </ul>
-
-        <div className="buttons">
-          <button
-            className="submit-button third-color"
-            onClick={handleSubmit}
-            disabled={isAnswered}
-          >
-            Submit
-          </button>
-
-          <button
-            id="next"
-            className="submit-button third-color next-button"
-            onClick={handleNext}
-            disabled={!isAnswered}
-          >
-            Next
-          </button>
-        </div>
-
-        {result && <div className="result">{result}</div>}
+              Natrag na postavke
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
