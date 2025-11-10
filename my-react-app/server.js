@@ -220,9 +220,9 @@ app.get("/api/words/:id", async (req, res) => {
     const word = await pool.query("SELECT * FROM words WHERE language_id = $1 AND word_id = $2", [language_id, id]);
     let ans;
     if(mod == "mod1"){
-      ans = word.rows[0].translation_to_croatian
+      ans = word.rows[0].translation_to_croatian;
     } else{
-      ans = word.rows[0].word_text
+      ans = word.rows[0].word_text;
     }
     res.json(ans);
     
@@ -268,7 +268,56 @@ app.put("/api/words/:id", async (req, res) => {
   }
 });
 
+app.put('/api/users/:email/name', async (req, res) => {
+  try {
+    const { email } = req.params;
+    const { newName } = req.body;
 
+    if (!newName || newName.length < 2 || newName.length > 50) {
+      return res.status(400).send("Ime mora imati između 2 i 50 znakova.");
+    }
+
+    const updateUser = await pool.query(
+      "UPDATE users SET name = $1 WHERE email = $2 RETURNING name, email, role",
+      [newName, email]
+    );
+
+    if (updateUser.rowCount === 0) {
+      return res.status(404).json("Korisnik nije pronađen.");
+    }
+
+    res.json({ message: "Ime uspješno promijenjeno.", user: updateUser.rows[0] });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Greška na serveru");
+  }
+});
+
+app.put('/api/users/:email/password', async (req, res) => {
+  try {
+    const { email } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 4 || newPassword.length > 100) {
+      return res.status(400).send("Lozinka mora imati između 4 i 100 znakova.");
+    }
+
+    const updateUser = await pool.query(
+      "UPDATE users SET password = $1 WHERE email = $2",
+      [newPassword, email]
+    );
+
+    if (updateUser.rowCount === 0) {
+      return res.status(404).json("Korisnik nije pronađen.");
+    }
+
+    res.json("Lozinka je uspješno promijenjena.");
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Greška na serveru");
+  }
+});
 
 
 app.listen(port, () => {
