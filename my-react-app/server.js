@@ -20,7 +20,7 @@ app.use(passport.session());
 
 const pool = new Pool({
   user: "postgres",
-  host: "localhost",
+  host: process.env.DB_HOST || "localhost",
   database: "progi",
   password: "bazepodataka",
   port: process.env.DB_PORT || 5432
