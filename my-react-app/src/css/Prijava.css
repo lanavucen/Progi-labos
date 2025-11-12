@@ -78,3 +78,19 @@ body{
     cursor: pointer;
     background-color: #ef5a5a !important;
 }
+.googlebutton{
+    margin-top: 0.8em;
+    font-size:1.5em;
+    align-items: center;
+    justify-content: center;
+    width: 15em;
+    height: 2em;
+    text-align: center;
+    background-color: #ffa952;
+    border-radius: 10px;
+    border:1px solid black
+}
+.googlebutton:hover{
+    background-color: #ef5a5a;
+    cursor: pointer;
+}

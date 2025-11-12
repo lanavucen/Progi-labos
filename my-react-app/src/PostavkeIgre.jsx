@@ -20,8 +20,19 @@ function PostavkeIgre() {
     }
 
     const fetchLanguages = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setError("Niste prijavljeni.");
+            return;
+        }
+
         try {
-            const response = await fetch('/api/languages');
+            const response = await fetch('/api/languages', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
             if (!response.ok) {
                 throw new Error("Greška pri dohvaćanju jezika");
             }
@@ -34,13 +45,20 @@ function PostavkeIgre() {
     };
 
     useEffect(() => {
+        const user = localStorage.getItem("user");
+        if (!user) {
+            alert("Morate biti prijavljeni da biste postavili igru.");
+            navigate('/Prijava');
+            return;
+        }
+
         const savedMod = localStorage.getItem("selectedMod");
         const savedRjecnik = localStorage.getItem("selectedRjecnik");
         
         setSelectedMod(savedMod || "");
         setSelectedRjecnik(savedRjecnik || "");
         fetchLanguages();
-    }, []);
+    }, [navigate]);
 
     const handleSubmitPostavkeIgre = (e) => {
         e.preventDefault();

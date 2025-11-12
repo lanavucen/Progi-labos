@@ -33,8 +33,9 @@ docker exec -it progi-db psql -U postgres progi
 CREATE TABLE users(
     name text not null,
     email text not null primary key,
-    password text not null,
-    role smallint default 0 not null
+    password text,
+    role smallint default 0 not null,
+    google_id text unique
 );
 INSERT INTO users(name, email, password, role) VALUES('koradmin', 'koradmin@gmail.com', 'koradmin', 2);
 INSERT INTO users(name, email, password, role) VALUES('admin', 'admin@gmail.com', 'admin', 1);
@@ -80,6 +81,69 @@ Zatim otvorite link iz terminala
 Naredbom: q + enter zatvarate aplikaciju
 Naredbom: docker-compose down zatvarate bazu u Docker kontejneru
 Naredbom: docker-compose down -v brisete bazu u Docker kontejneru
+
+
+
+6. OAuth
+
+Kreirajte u my-react-app textualnu datoteku ".env" i zalijepite u nju sljedeci tekst:
+
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+SESSION_SECRET=a_random_secret_string_for_sessions
+JWT_SECRET=another_random_secret_for_jwt
+
+
+Ako ste kreirali bazu iz trenutne verzije ovih uputa preskočite ove korake i idite na 6.1
+Potrebno je malo prepraviti bazu.
+U terminalu upisite: docker exec -it progi-db psql -U postgres progi
+Zatim zalijepite ove naredbe:
+
+ALTER TABLE users ALTER COLUMN password DROP NOT NULL;
+
+ALTER TABLE users ADD COLUMN google_id TEXT UNIQUE;
+
+
+
+6.1. Idite na Google Cloud Console
+(https://www.google.com/url?sa=E&q=https%3A%2F%2Fconsole.cloud.google.com%2F). 
+Prijavite se sa svojim Google računom.
+
+
+
+6.2. Na vrhu stranice, kliknite na padajući izbornik za projekte (pored "Google Cloud" loga) i odaberite "New Project". Nazovite ga npr. "React Aplikacija".
+
+6.3. Nakon što je projekt stvoren, provjerite da je odabran.
+
+6.4. U lijevom navigacijskom meniju (ili preko tražilice na vrhu), pronađite "APIs & Services" i kliknite na "Credentials".
+
+6.5. Kliknite na veliki plavi gumb "+ CREATE CREDENTIALS" i odaberite "OAuth client ID".
+
+6.6. Prvi put ćete morati konfigurirati "OAuth consent screen" (ekran za pristanak).
+	- Upišite App name (npr. "Moja Aplikacija").
+	- Upišite User support email (vaš email).
+	- Odaberite "External" i kliknite "Create".
+	- Scrollajte dolje i upišite Developer contact information (opet vaš email).
+	- Kliknite "Save and Continue" kroz sve korake (Scopes, Test Users). Ne trebate ništa dodavati za sada. Na kraju kliknite "Back to Dashboard".
+
+6.7. Vratite se na "Credentials" tab, ponovno kliknite "+ CREATE CREDENTIALS" -> "OAuth client ID".
+
+6.8. Sada popunite formu:
+	- Application type: Odaberite "Web application".
+	- Name: Može ostati "Web client 1".
+	- Authorized redirect URIs (kopiraj točno ovo): 
+
+http://localhost:3001/api/auth/google/callback
+
+	- Authorized JavaScript origins (kopiraj točno ovo): 
+
+http://localhost:5173
+
+
+6.9. Kliknite "Create". Pojavit će se prozorčić s vašim ključevima! Kopirajte vrijednosti za "Your Client ID" i "Your Client Secret". To su vrijednosti koje trebate zalijepiti u svoju .env datoteku.
+
+
+
 
 
 

@@ -68,6 +68,12 @@ function Prijava() {
       <button className="submitbutton" onClick={handleSubmit}>
         Submit
       </button>
+
+      <button className="googlebutton" onClick={() => {window.location.href = "http://localhost:3001/api/auth/google";}}>
+        Prijavi se s Googleom
+      </button>
+
+      
     </div>
   );
 }
