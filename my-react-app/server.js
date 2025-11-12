@@ -87,7 +87,7 @@ app.get('/api/auth/google/callback',
     const user = req.user;
     const token = jwt.sign({ email: user.email, name: user.name, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
     const callbackUrl = process.env.NODE_ENV === 'production' 
-    ? `https://your-deployment-url.com/auth/callback?token=${token}`
+    ? `https://progi-labos-spaced-repetition-app.onrender.com/auth/callback?token=${token}`
     : `http://localhost:5173/auth/callback?token=${token}`;
 
     res.redirect(callbackUrl);
