@@ -1,6 +1,12 @@
 import express from "express";
 import cors from "cors";
 import pg from "pg";
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import jwt from "jsonwebtoken";
+import session from "express-session";
+import "dotenv/config";
+import { verifyToken } from './authMiddleware.js';
 
 const { Pool } = pg;
 const app = express();
@@ -8,6 +14,9 @@ const port = 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 const pool = new Pool({
   user: "postgres",
@@ -16,6 +25,72 @@ const pool = new Pool({
   password: "bazepodataka",
   port: 5433
 });
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "/api/auth/google/callback"
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    const { id, displayName, emails } = profile;
+    const email = emails[0].value;
+
+    try {
+      let userResult = await pool.query("SELECT * FROM users WHERE google_id = $1", [id]);
+
+      if (userResult.rows.length > 0) {
+        return done(null, userResult.rows[0]);
+      }
+
+      userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+
+      if (userResult.rows.length > 0) {
+        const updatedUser = await pool.query(
+          "UPDATE users SET google_id = $1 WHERE email = $2 RETURNING *",
+          [id, email]
+        );
+        return done(null, updatedUser.rows[0]);
+      }
+
+      const newUser = await pool.query(
+        "INSERT INTO users (name, email, google_id) VALUES ($1, $2, $3) RETURNING *",
+        [displayName, email, id]
+      );
+      return done(null, newUser.rows[0]);
+
+    } catch (err) {
+      return done(err, null);
+    }
+  }
+));
+
+passport.serializeUser((user, done) => {
+  done(null, user.email);
+});
+
+passport.deserializeUser(async (email, done) => {
+  try {
+    const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    done(null, user.rows[0]);
+  } catch (err) {
+    done(err, null);
+  }
+});
+
+app.get('/api/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/api/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/Prijava' }),
+  (req, res) => {
+    const user = req.user;
+    const token = jwt.sign({ email: user.email, name: user.name, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    
+    res.redirect(`http://localhost:5173/auth/callback?token=${token}`);
+  }
+);
+
 
 app.post("/api/registracija", async (req, res) => {
   const { name, email, password } = req.body;
@@ -70,7 +145,7 @@ app.post("/api/prijava", async (req, res) => {
   }
 });
 
-app.delete("/api/users/:email", async (req, res) => {
+app.delete("/api/users/:email", verifyToken, async (req, res) => {
   try {
     const { email } = req.params;
 
@@ -87,19 +162,25 @@ app.delete("/api/users/:email", async (req, res) => {
   }
 });
 
-app.get("/api/admin/dashboard", async (req, res) => {
+app.get("/api/admin/dashboard", verifyToken, async (req, res) => {
   try {
-    const userResult = await pool.query("SELECT role FROM users WHERE email = $1", [email]);
-    if (userResult.rows.length === 0 || userResult.rows[0].role < 1) {
+    const userRole = req.user.role; 
+
+    if (userRole < 1) {
       return res.status(403).send("Pristup odbijen. Potrebna su administratorska prava.");
     }
-    res.json({ message: "Dobrodošao na admin dashboard!", totalUsers: 150 });
+
+    const result = await pool.query('SELECT COUNT(*) FROM users');
+    const totalUsers = result.rows[0].count;
+
+    res.json({ message: `Dobrodošao na admin dashboard, ${req.user.name}!`, totalUsers: totalUsers });
   } catch (err) {
+    console.error(err.message);
     res.status(500).send("Greška na serveru");
   }
 });
 
-app.put("/api/users/:targetEmail/role", async (req, res) => {
+app.put("/api/users/:targetEmail/role", verifyToken, async (req, res) => {
   try {
     const { targetEmail } = req.params;
     const { newRole, adminEmail } = req.body;
@@ -122,7 +203,7 @@ app.put("/api/users/:targetEmail/role", async (req, res) => {
   }
 });
 
-app.get('/api/admin/users', async (req, res) => {
+app.get('/api/admin/users', verifyToken, async (req, res) => {
   try {
     const { adminEmail } = req.query;
 
@@ -145,7 +226,7 @@ app.get('/api/admin/users', async (req, res) => {
   }
 });
 
-app.get("/api/languages", async (req, res) => {
+app.get("/api/languages", verifyToken, async (req, res) => {
   try {
     const allLanguages = await pool.query("SELECT * FROM languages ORDER BY language_name");
     res.json(allLanguages.rows);
@@ -154,7 +235,7 @@ app.get("/api/languages", async (req, res) => {
   }
 });
 
-app.post("/api/languages", async (req, res) => {
+app.post("/api/languages", verifyToken, async (req, res) => {
   try {
     const { language_name } = req.body;
     const newLanguage = await pool.query(
@@ -167,7 +248,7 @@ app.post("/api/languages", async (req, res) => {
   }
 });
 
-app.delete("/api/languages/:id", async (req, res) => {
+app.delete("/api/languages/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     await pool.query("DELETE FROM languages WHERE language_id = $1", [id]);
@@ -177,7 +258,7 @@ app.delete("/api/languages/:id", async (req, res) => {
   }
 });
 
-app.get("/api/words", async (req, res) => {
+app.get("/api/words", verifyToken, async (req, res) => {
   try {
     const { language_id, mod, word_id } = req.query;
     let words;
@@ -213,7 +294,7 @@ app.get("/api/words", async (req, res) => {
 });
 
 
-app.get("/api/words/:id", async (req, res) => {
+app.get("/api/words/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { language_id, mod} = req.query;
@@ -231,7 +312,7 @@ app.get("/api/words/:id", async (req, res) => {
   }
 });
 
-app.post("/api/words", async (req, res) => {
+app.post("/api/words", verifyToken, async (req, res) => {
   try {
     const { word_text, language_id, translation_to_croatian, phrases } = req.body;
     const newWord = await pool.query(
@@ -244,7 +325,7 @@ app.post("/api/words", async (req, res) => {
   }
 });
 
-app.delete("/api/words/:id", async (req, res) => {
+app.delete("/api/words/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     await pool.query("DELETE FROM words WHERE word_id = $1", [id]);
@@ -254,7 +335,7 @@ app.delete("/api/words/:id", async (req, res) => {
   }
 });
 
-app.put("/api/words/:id", async (req, res) => {
+app.put("/api/words/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { word_text, translation_to_croatian, phrases } = req.body;
@@ -268,7 +349,7 @@ app.put("/api/words/:id", async (req, res) => {
   }
 });
 
-app.put('/api/users/:email/name', async (req, res) => {
+app.put('/api/users/:email/name', verifyToken, async (req, res) => {
   try {
     const { email } = req.params;
     const { newName } = req.body;
@@ -294,7 +375,7 @@ app.put('/api/users/:email/name', async (req, res) => {
   }
 });
 
-app.put('/api/users/:email/password', async (req, res) => {
+app.put('/api/users/:email/password', verifyToken, async (req, res) => {
   try {
     const { email } = req.params;
     const { newPassword } = req.body;

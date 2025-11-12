@@ -11,6 +11,7 @@ import Igra from "./Igra";
 import PostavkeRjecnika from "./PostavkeRjecnika";
 import UpravljanjeUlogama from "./UpravljanjeUlogama";
 import PostavkeIgre from "./PostavkeIgre.jsx";
+import AuthCallback from './AuthCallback';
 
 const router=createBrowserRouter([
   {
@@ -39,6 +40,10 @@ const router=createBrowserRouter([
   {
     path:'/PostavkeIgre',
     element:<PostavkeIgre/>
+  },
+  {
+    path: '/auth/callback',
+    element: <AuthCallback />
   }
 ]);
 

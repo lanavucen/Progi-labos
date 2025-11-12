@@ -9,8 +9,13 @@ function UpravljanjeUlogama() {
   const [error, setError] = useState('');
 
   const fetchUsers = async (admin) => {
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`/api/admin/users?adminEmail=${admin.email}`);
+      const response = await fetch(`/api/admin/users?adminEmail=${admin.email}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || 'Nije moguće dohvatiti korisnike.');
@@ -43,12 +48,16 @@ function UpravljanjeUlogama() {
   }, [navigate]);
 
   const handleChangeRole = async (targetEmail, newRole) => {
+    const token = localStorage.getItem("token");
     if (!window.confirm(`Jeste li sigurni da želite promijeniti ulogu korisniku ${targetEmail}?`)) return;
 
     try {
       const response = await fetch(`/api/users/${targetEmail}/role`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ newRole, adminEmail: currentUser.email })
       });
 

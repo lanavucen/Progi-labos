@@ -4,22 +4,35 @@ import { useState, useEffect } from "react";
 
 function PostavkeIgre() {
     const navigate = useNavigate();
-    const [selectedMod, setSelectedMod] = useState("");
-    const [selectedRjecnik, setSelectedRjecnik] = useState("");
+    const [selectedMod, setSelectedMod] = useState(localStorage.getItem("selectedMod") || "");
+    const [selectedRjecnik, setSelectedRjecnik] = useState(localStorage.getItem("selectedRjecnik") || "");
     const [languages, setLanguages] = useState([]);
     const [error, setError] = useState("");
 
     const handleModChange = (event) => {
         setSelectedMod(event.target.value);
+        localStorage.setItem("selectedMod", event.target.value);
     }
 
     const handleRjecnikChange = (event) => {
         setSelectedRjecnik(event.target.value);
+        localStorage.setItem("selectedRjecnik", event.target.value);
     }
 
     const fetchLanguages = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setError("Niste prijavljeni.");
+            return;
+        }
+
         try {
-            const response = await fetch('/api/languages');
+            const response = await fetch('/api/languages', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
             if (!response.ok) {
                 throw new Error("Greška pri dohvaćanju jezika");
             }
@@ -32,8 +45,20 @@ function PostavkeIgre() {
     };
 
     useEffect(() => {
+        const user = localStorage.getItem("user");
+        if (!user) {
+            alert("Morate biti prijavljeni da biste postavili igru.");
+            navigate('/Prijava');
+            return;
+        }
+
+        const savedMod = localStorage.getItem("selectedMod");
+        const savedRjecnik = localStorage.getItem("selectedRjecnik");
+        
+        setSelectedMod(savedMod || "");
+        setSelectedRjecnik(savedRjecnik || "");
         fetchLanguages();
-    }, []);
+    }, [navigate]);
 
     const handleSubmitPostavkeIgre = (e) => {
         e.preventDefault();

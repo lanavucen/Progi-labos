@@ -38,13 +38,16 @@ export default function Igra() {
   }, [mod, rjecnik, navigate]);
 
   const fetchWords = async (langId) => {
+    const token = localStorage.getItem("token"); 
     if (!langId) {
       setAllWords([]);
       return;
     }
     
     try {
-      const response = await fetch(`/api/words?language_id=${langId}&mod=${mod}`);
+      const response = await fetch(`/api/words?language_id=${langId}&mod=${mod}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await response.json();
       setAllWords(data);
   
@@ -62,12 +65,15 @@ export default function Igra() {
   };
 
   const fetchChoices = async (langId, wordId) => {
+    const token = localStorage.getItem("token"); 
     if (!langId || !wordId) {
       setChoices([]);
       return;
     }
     try {
-      const response = await fetch(`/api/words?language_id=${langId}&mod=${mod}&word_id=${wordId}`);
+      const response = await fetch(`/api/words?language_id=${langId}&mod=${mod}&word_id=${wordId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await response.json();
       setChoices(data);
     } catch (err) {
@@ -104,6 +110,7 @@ export default function Igra() {
 
 
   const handleSubmit = async () => {
+    const token = localStorage.getItem("token");
     if (!selectedAnswer) {
       setResult("Please select an answer first!");
       return;
@@ -111,7 +118,9 @@ export default function Igra() {
     
     try {
       const wordId = currentWord.word_id;
-      const res = await fetch(`/api/words/${wordId}?language_id=${rjecnik}&mod=${mod}`);
+      const res = await fetch(`/api/words/${wordId}?language_id=${rjecnik}&mod=${mod}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const correctAnswer = await res.json();
       const isCorrect = selectedAnswer === correctAnswer;
       const rezultat = raspored.obradi(wordId, isCorrect);

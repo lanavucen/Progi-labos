@@ -32,11 +32,17 @@ function Profil() {
   };
 
   const handleDeleteAccount = async () => {
+    const token = localStorage.getItem('token');
     if (!window.confirm("Jeste li sigurni da želite trajno obrisati svoj račun?")) {
       return;
     }
     try {
-      const response = await fetch(`/api/users/${user.email}`, { method: "DELETE" });
+      const response = await fetch(`/api/users/${user.email}`, {
+        method: "DELETE",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         alert("Vaš račun je uspješno obrisan.");
         handleLogout();
@@ -51,6 +57,7 @@ function Profil() {
   };
 
   const handleNameChange = async () => {
+    const token = localStorage.getItem("token");
     setMessage("");
     if (newName.length < 2 || newName.length > 50) {
       setMessage("Ime mora imati između 2 i 50 znakova.");
@@ -59,7 +66,10 @@ function Profil() {
     try {
       const response = await fetch(`/api/users/${user.email}/name`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ newName })
       });
 
@@ -85,6 +95,7 @@ function Profil() {
   };
 
   const handlePasswordChange = async () => {
+    const token = localStorage.getItem("token");
     setMessage("");
     if (newPassword !== confirmPassword) {
       setMessage("Lozinke se ne podudaraju!");
@@ -97,7 +108,10 @@ function Profil() {
     try {
       const response = await fetch(`/api/users/${user.email}/password`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${token}`
+      },
         body: JSON.stringify({ newPassword })
       });
       if (response.ok) {
