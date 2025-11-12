@@ -10,7 +10,7 @@ import { verifyToken } from './authMiddleware.js';
 
 const { Pool } = pg;
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -23,7 +23,7 @@ const pool = new Pool({
   host: "localhost",
   database: "progi",
   password: "bazepodataka",
-  port: 5433
+  port: process.env.DB_PORT || 5432
 });
 
 passport.use(new GoogleStrategy({
@@ -86,8 +86,11 @@ app.get('/api/auth/google/callback',
   (req, res) => {
     const user = req.user;
     const token = jwt.sign({ email: user.email, name: user.name, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    
-    res.redirect(`http://localhost:5173/auth/callback?token=${token}`);
+    const callbackUrl = process.env.NODE_ENV === 'production' 
+    ? `https://your-deployment-url.com/auth/callback?token=${token}`
+    : `http://localhost:5173/auth/callback?token=${token}`;
+
+    res.redirect(callbackUrl);
   }
 );
 
@@ -399,6 +402,16 @@ app.put('/api/users/:email/password', verifyToken, async (req, res) => {
     res.status(500).send("Greška na serveru");
   }
 });
+
+import path from 'path';
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'build')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
+}
+
 
 
 app.listen(port, () => {
