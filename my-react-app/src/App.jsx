@@ -2,9 +2,18 @@ import "./css/App.css";
 import Naslov from "./components/Tekst";
 import Opis from "./components/Opis";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function App() {
   const navigate = useNavigate();
+
+
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+      const userLoggedIn = localStorage.getItem('user') !== null;
+      setLoggedIn(userLoggedIn);
+    }, []);
 
   return (
     <div className="container">
@@ -16,9 +25,15 @@ export default function App() {
       <p className="opis">
         <Opis />
       </p>
-      <button className="profilbutton" onClick={() => navigate("/Prijava")}>
-        PRIJAVI SE
-      </button>
+      {loggedIn ? (
+        <button className="profilbutton" onClick={() => navigate("/Profil")}>
+          PROFIL
+        </button>
+      ) : (
+        <button className="profilbutton" onClick={() => navigate("/Prijava")}>
+          PRIJAVI SE
+        </button>
+      )}
       <button className="profilbutton" onClick={() => navigate("/PostavkeIgre")}>
         IGRAJ
       </button>
