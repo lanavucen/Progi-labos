@@ -69,7 +69,7 @@ function Prijava() {
         Submit
       </button>
 
-      <button className="googlebutton" onClick={() => {window.location.href = "http://localhost:3001/api/auth/google";}}>
+      <button className="googlebutton" onClick={() => {window.location.href = `${process.env.REACT_APP_BACKEND_URL}/api/auth/google`;}}>
         Prijavi se s Googleom
       </button>
 

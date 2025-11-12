@@ -92,6 +92,7 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 SESSION_SECRET=a_random_secret_string_for_sessions
 JWT_SECRET=another_random_secret_for_jwt
+REACT_APP_BACKEND_URL=http://localhost:3001
 
 
 Ako ste kreirali bazu iz trenutne verzije ovih uputa preskočite ove korake i idite na 6.1
