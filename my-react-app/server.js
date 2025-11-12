@@ -409,10 +409,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'my-react-app/build')));
+  app.use(express.static(path.join(__dirname, 'my-react-app/dist')));
 
   app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'my-react-app/build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'my-react-app/dist', 'index.html'));
   });
 }
 
