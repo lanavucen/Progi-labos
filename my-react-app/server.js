@@ -146,7 +146,7 @@ app.post("/api/prijava", async (req, res) => {
   }
 });
 
-app.delete("/api/users/:email", verifyToken, async (req, res) => {
+app.delete("/api/users/:email", async (req, res) => {
   try {
     const { email } = req.params;
 
@@ -163,7 +163,7 @@ app.delete("/api/users/:email", verifyToken, async (req, res) => {
   }
 });
 
-app.get("/api/admin/dashboard", verifyToken, async (req, res) => {
+app.get("/api/admin/dashboard", async (req, res) => {
   try {
     const userRole = req.user.role; 
 
@@ -181,7 +181,7 @@ app.get("/api/admin/dashboard", verifyToken, async (req, res) => {
   }
 });
 
-app.put("/api/users/:targetEmail/role", verifyToken, async (req, res) => {
+app.put("/api/users/:targetEmail/role", async (req, res) => {
   try {
     const { targetEmail } = req.params;
     const { newRole, adminEmail } = req.body;
@@ -204,7 +204,7 @@ app.put("/api/users/:targetEmail/role", verifyToken, async (req, res) => {
   }
 });
 
-app.get('/api/admin/users', verifyToken, async (req, res) => {
+app.get('/api/admin/users', async (req, res) => {
   try {
     const { adminEmail } = req.query;
 
@@ -227,7 +227,7 @@ app.get('/api/admin/users', verifyToken, async (req, res) => {
   }
 });
 
-app.get("/api/languages", verifyToken, async (req, res) => {
+app.get("/api/languages", async (req, res) => {
   try {
     const allLanguages = await pool.query("SELECT * FROM languages ORDER BY language_name");
     res.json(allLanguages.rows);
@@ -236,7 +236,7 @@ app.get("/api/languages", verifyToken, async (req, res) => {
   }
 });
 
-app.post("/api/languages", verifyToken, async (req, res) => {
+app.post("/api/languages", async (req, res) => {
   try {
     const { language_name } = req.body;
     const newLanguage = await pool.query(
@@ -249,7 +249,7 @@ app.post("/api/languages", verifyToken, async (req, res) => {
   }
 });
 
-app.delete("/api/languages/:id", verifyToken, async (req, res) => {
+app.delete("/api/languages/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await pool.query("DELETE FROM languages WHERE language_id = $1", [id]);
@@ -259,7 +259,7 @@ app.delete("/api/languages/:id", verifyToken, async (req, res) => {
   }
 });
 
-app.get("/api/words", verifyToken, async (req, res) => {
+app.get("/api/words", async (req, res) => {
   try {
     const { language_id, mod, word_id } = req.query;
     let words;
@@ -295,7 +295,7 @@ app.get("/api/words", verifyToken, async (req, res) => {
 });
 
 
-app.get("/api/words/:id", verifyToken, async (req, res) => {
+app.get("/api/words/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { language_id, mod} = req.query;
@@ -313,7 +313,7 @@ app.get("/api/words/:id", verifyToken, async (req, res) => {
   }
 });
 
-app.post("/api/words", verifyToken, async (req, res) => {
+app.post("/api/words", async (req, res) => {
   try {
     const { word_text, language_id, translation_to_croatian, phrases } = req.body;
     const newWord = await pool.query(
@@ -326,7 +326,7 @@ app.post("/api/words", verifyToken, async (req, res) => {
   }
 });
 
-app.delete("/api/words/:id", verifyToken, async (req, res) => {
+app.delete("/api/words/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await pool.query("DELETE FROM words WHERE word_id = $1", [id]);
@@ -336,7 +336,7 @@ app.delete("/api/words/:id", verifyToken, async (req, res) => {
   }
 });
 
-app.put("/api/words/:id", verifyToken, async (req, res) => {
+app.put("/api/words/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { word_text, translation_to_croatian, phrases } = req.body;
@@ -350,7 +350,7 @@ app.put("/api/words/:id", verifyToken, async (req, res) => {
   }
 });
 
-app.put('/api/users/:email/name', verifyToken, async (req, res) => {
+app.put('/api/users/:email/name', async (req, res) => {
   try {
     const { email } = req.params;
     const { newName } = req.body;
@@ -376,7 +376,7 @@ app.put('/api/users/:email/name', verifyToken, async (req, res) => {
   }
 });
 
-app.put('/api/users/:email/password', verifyToken, async (req, res) => {
+app.put('/api/users/:email/password', async (req, res) => {
   try {
     const { email } = req.params;
     const { newPassword } = req.body;
