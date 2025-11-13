@@ -21,10 +21,10 @@ function PostavkeIgre() {
 
     const fetchLanguages = async () => {
         const token = localStorage.getItem("token");
-        if (!token) {
-            setError("Niste prijavljeni.");
-            return;
-        }
+        //if (!token) {
+        //    setError("Niste prijavljeni.");
+        //    return;
+        //}
 
         try {
             const response = await fetch('/api/languages', {
