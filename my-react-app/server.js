@@ -141,21 +141,26 @@ app.post("/api/registracija", async (req, res) => {
 app.post("/api/prijava", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await pool.query("SELECT name, email, password, role FROM users WHERE email = $1", [email]);
+    const user = await pool.query(
+      "SELECT name, email, password, role FROM users WHERE email = $1",
+      [email]
+    );
 
     if (user.rows.length === 0) {
-      return res.status(401).json("Korisnik ne postoji");
+      return res.status(401).json({ error: "Korisnik ne postoji" });
     }
 
     if (user.rows[0].password !== password) {
-      return res.status(401).json("Pogrešna lozinka");
+      return res.status(401).json({ error: "Pogrešna lozinka" });
     }
+
     res.json({ message: "Prijava uspješna", user: user.rows[0] });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Greška na serveru");
+    res.status(500).json({ error: "Greška na serveru" });
   }
 });
+
 
 app.delete("/api/users/:email", async (req, res) => {
   try {
