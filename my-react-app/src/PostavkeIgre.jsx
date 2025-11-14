@@ -2,6 +2,8 @@ import "./css/PostavkeIgre.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function PostavkeIgre() {
     const navigate = useNavigate();
     const [selectedMod, setSelectedMod] = useState(localStorage.getItem("selectedMod") || "");
@@ -27,7 +29,7 @@ function PostavkeIgre() {
         //}
 
         try {
-            const response = await fetch('/api/languages', {
+            const response = await fetch(`${API_URL}/api/languages`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

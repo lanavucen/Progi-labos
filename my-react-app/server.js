@@ -10,7 +10,7 @@ import { verifyToken } from './authMiddleware.js';
 
 const { Pool } = pg;
 const app = express();
-const port = process.env.PORT || 3001;
+const port = 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -18,27 +18,27 @@ app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUniniti
 app.use(passport.initialize());
 app.use(passport.session());
 
-let pool;
-if (process.env.DATABASE_URL) {
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-  });
-} else {
-  pool = new Pool({
-    user: process.env.DB_USER || "postgres",
-    host: process.env.DB_HOST || "localhost",
-    database: process.env.DB_NAME || "progi",
-    password: process.env.DB_PASSWORD || "bazepodataka",
-    port: process.env.DB_PORT || 5432
-  });
-}
+/*const pool = new Pool({
+  user: "postgres",
+  host: "localhost",
+  database: "progi",
+  password: "bazepodataka",
+  port: 5433
+});*/
 
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
+const pool = new Pool({
+  connectionString: IS_PRODUCTION ? process.env.DATABASE_URL : `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`,
+  
+  ssl: IS_PRODUCTION ? { rejectUnauthorized: false } : false
+});
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/callback"
+    callbackURL: `${BACKEND_URL}/api/auth/google/callback`
   },
   async (accessToken, refreshToken, profile, done) => {
     const { id, displayName, emails } = profile;
@@ -79,27 +79,33 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (email, done) => {
   try {
-    const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    done(null, user.rows[0]);
+    const userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (userResult.rows.length > 0) {
+      done(null, userResult.rows[0]);
+    } else {
+      done(null, false);
+    }
   } catch (err) {
     done(err, null);
   }
 });
 
 app.get('/api/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+  passport.authenticate('google', { 
+    scope: ['profile', 'email']
+  })
 );
 
 app.get('/api/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/Prijava' }),
+  passport.authenticate('google', { 
+    failureRedirect: `${process.env.FRONTEND_URL}/Prijava`,
+    session: false
+  }),
   (req, res) => {
     const user = req.user;
     const token = jwt.sign({ email: user.email, name: user.name, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    const callbackUrl = process.env.NODE_ENV === 'production' 
-    ? `https://progi-labos-spaced-repetition-app.onrender.com/auth/callback?token=${token}`
-    : `http://localhost:5173/auth/callback?token=${token}`;
-
-    res.redirect(callbackUrl);
+    
+    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
   }
 );
 
@@ -141,28 +147,41 @@ app.post("/api/registracija", async (req, res) => {
 app.post("/api/prijava", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await pool.query(
-      "SELECT name, email, password, role FROM users WHERE email = $1",
-      [email]
+    const userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json("Korisnik ne postoji");
+    }
+
+    const user = userResult.rows[0];
+
+    if (user.password !== password) {
+      return res.status(401).json("Pogrešna lozinka");
+    }
+
+    const token = jwt.sign(
+      { email: user.email, name: user.name, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
     );
 
-    if (user.rows.length === 0) {
-      return res.status(401).json({ error: "Korisnik ne postoji" });
-    }
+    res.json({ 
+      message: "Prijava uspješna", 
+      token: token, 
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role
+      } 
+    });
 
-    if (user.rows[0].password !== password) {
-      return res.status(401).json({ error: "Pogrešna lozinka" });
-    }
-
-    res.json({ message: "Prijava uspješna", user: user.rows[0] });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: "Greška na serveru" });
+    res.status(500).send("Greška na serveru");
   }
 });
 
-
-app.delete("/api/users/:email", async (req, res) => {
+app.delete("/api/users/:email", verifyToken, async (req, res) => {
   try {
     const { email } = req.params;
 
@@ -179,7 +198,7 @@ app.delete("/api/users/:email", async (req, res) => {
   }
 });
 
-app.get("/api/admin/dashboard", async (req, res) => {
+app.get("/api/admin/dashboard", verifyToken, async (req, res) => {
   try {
     const userRole = req.user.role; 
 
@@ -197,7 +216,7 @@ app.get("/api/admin/dashboard", async (req, res) => {
   }
 });
 
-app.put("/api/users/:targetEmail/role", async (req, res) => {
+app.put("/api/users/:targetEmail/role", verifyToken, async (req, res) => {
   try {
     const { targetEmail } = req.params;
     const { newRole, adminEmail } = req.body;
@@ -220,7 +239,7 @@ app.put("/api/users/:targetEmail/role", async (req, res) => {
   }
 });
 
-app.get('/api/admin/users', async (req, res) => {
+app.get('/api/admin/users', verifyToken, async (req, res) => {
   try {
     const { adminEmail } = req.query;
 
@@ -243,7 +262,7 @@ app.get('/api/admin/users', async (req, res) => {
   }
 });
 
-app.get("/api/languages", async (req, res) => {
+app.get("/api/languages", verifyToken, async (req, res) => {
   try {
     const allLanguages = await pool.query("SELECT * FROM languages ORDER BY language_name");
     res.json(allLanguages.rows);
@@ -252,7 +271,7 @@ app.get("/api/languages", async (req, res) => {
   }
 });
 
-app.post("/api/languages", async (req, res) => {
+app.post("/api/languages", verifyToken, async (req, res) => {
   try {
     const { language_name } = req.body;
     const newLanguage = await pool.query(
@@ -265,7 +284,7 @@ app.post("/api/languages", async (req, res) => {
   }
 });
 
-app.delete("/api/languages/:id", async (req, res) => {
+app.delete("/api/languages/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     await pool.query("DELETE FROM languages WHERE language_id = $1", [id]);
@@ -275,7 +294,7 @@ app.delete("/api/languages/:id", async (req, res) => {
   }
 });
 
-app.get("/api/words", async (req, res) => {
+app.get("/api/words", verifyToken, async (req, res) => {
   try {
     const { language_id, mod, word_id } = req.query;
     let words;
@@ -311,7 +330,7 @@ app.get("/api/words", async (req, res) => {
 });
 
 
-app.get("/api/words/:id", async (req, res) => {
+app.get("/api/words/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { language_id, mod} = req.query;
@@ -329,7 +348,7 @@ app.get("/api/words/:id", async (req, res) => {
   }
 });
 
-app.post("/api/words", async (req, res) => {
+app.post("/api/words", verifyToken, async (req, res) => {
   try {
     const { word_text, language_id, translation_to_croatian, phrases } = req.body;
     const newWord = await pool.query(
@@ -342,7 +361,7 @@ app.post("/api/words", async (req, res) => {
   }
 });
 
-app.delete("/api/words/:id", async (req, res) => {
+app.delete("/api/words/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     await pool.query("DELETE FROM words WHERE word_id = $1", [id]);
@@ -352,7 +371,7 @@ app.delete("/api/words/:id", async (req, res) => {
   }
 });
 
-app.put("/api/words/:id", async (req, res) => {
+app.put("/api/words/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { word_text, translation_to_croatian, phrases } = req.body;
@@ -366,25 +385,30 @@ app.put("/api/words/:id", async (req, res) => {
   }
 });
 
-app.put('/api/users/:email/name', async (req, res) => {
+app.put('/api/users/:email/name', verifyToken, async (req, res) => {
   try {
-    const { email } = req.params;
-    const { newName } = req.body;
+    const targetEmail = req.params.email;
+    const requesterEmail = req.user.email;
 
+    if (requesterEmail !== targetEmail && req.user.role !== 2) {
+      return res.status(403).send("Zabranjeno: Nemate dopuštenje za izmjenu ovog korisnika.");
+    }
+
+    const { newName } = req.body;
     if (!newName || newName.length < 2 || newName.length > 50) {
       return res.status(400).send("Ime mora imati između 2 i 50 znakova.");
     }
 
     const updateUser = await pool.query(
       "UPDATE users SET name = $1 WHERE email = $2 RETURNING name, email, role",
-      [newName, email]
+      [newName, targetEmail]
     );
 
     if (updateUser.rowCount === 0) {
       return res.status(404).json("Korisnik nije pronađen.");
     }
 
-    res.json({ message: "Ime uspješno promijenjeno.", user: updateUser.rows[0] });
+    res.json(updateUser.rows[0]);
 
   } catch (err) {
     console.error(err.message);
@@ -392,18 +416,23 @@ app.put('/api/users/:email/name', async (req, res) => {
   }
 });
 
-app.put('/api/users/:email/password', async (req, res) => {
+app.put('/api/users/:email/password', verifyToken, async (req, res) => {
   try {
-    const { email } = req.params;
-    const { newPassword } = req.body;
+    const targetEmail = req.params.email;
+    const requesterEmail = req.user.email;
 
+    if (requesterEmail !== targetEmail) {
+      return res.status(403).send("Zabranjeno: Možete promijeniti samo vlastitu lozinku.");
+    }
+
+    const { newPassword } = req.body;
     if (!newPassword || newPassword.length < 4 || newPassword.length > 100) {
       return res.status(400).send("Lozinka mora imati između 4 i 100 znakova.");
     }
 
     const updateUser = await pool.query(
       "UPDATE users SET password = $1 WHERE email = $2",
-      [newPassword, email]
+      [newPassword, targetEmail]
     );
 
     if (updateUser.rowCount === 0) {
@@ -416,21 +445,6 @@ app.put('/api/users/:email/password', async (req, res) => {
     res.status(500).send("Greška na serveru");
   }
 });
-
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'dist')));
-
-  app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-  });
-}
-
-
 
 
 app.listen(port, () => {

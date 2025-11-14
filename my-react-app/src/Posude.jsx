@@ -78,7 +78,7 @@ class rasporediPosude{
     } else{
       postotak = 0;
     }
-
+    
     return {
       novaRazina: progress.razina,
       posuda: `${progress.razina}`,

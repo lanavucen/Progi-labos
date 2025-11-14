@@ -2,6 +2,8 @@ import "./css/Profil.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function Profil() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -37,7 +39,7 @@ function Profil() {
       return;
     }
     try {
-      const response = await fetch(`/api/users/${user.email}`, {
+      const response = await fetch(`${API_URL}/api/users/${user.email}`, {
         method: "DELETE",
         headers: {
           'Authorization': `Bearer ${token}`
@@ -64,7 +66,7 @@ function Profil() {
       return;
     }
     try {
-      const response = await fetch(`/api/users/${user.email}/name`, {
+      const response = await fetch(`${API_URL}/api/users/${user.email}/name`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -106,7 +108,7 @@ function Profil() {
       return;
     }
     try {
-      const response = await fetch(`/api/users/${user.email}/password`, {
+      const response = await fetch(`${API_URL}/api/users/${user.email}/password`, {
         method: "PUT",
         headers: { 
         "Content-Type": "application/json",
