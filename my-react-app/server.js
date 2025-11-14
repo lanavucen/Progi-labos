@@ -37,7 +37,6 @@ const pool = new Pool({
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://progi-backend.onrender.com/api/auth/google/callback" 
   },
   async (accessToken, refreshToken, profile, done) => {
     const { id, displayName, emails } = profile;
@@ -86,11 +85,17 @@ passport.deserializeUser(async (email, done) => {
 });
 
 app.get('/api/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    callbackURL: `${process.env.BACKEND_URL}/api/auth/google/callback`
+  })
 );
 
 app.get('/api/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/Prijava' }),
+  passport.authenticate('google', { 
+    failureRedirect: `${process.env.FRONTEND_URL}/Prijava`,
+    session: false
+  }),
   (req, res) => {
     const user = req.user;
     const token = jwt.sign({ email: user.email, name: user.name, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
