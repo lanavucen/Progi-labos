@@ -34,10 +34,12 @@ const pool = new Pool({
   ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
+const callbackURL = process.env.NODE_ENV === 'production' ? `${process.env.BACKEND_URL}/api/auth/google/callback` : '/api/auth/google/callback';
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/callback"
+    callbackURL: callbackURL
   },
   async (accessToken, refreshToken, profile, done) => {
     const { id, displayName, emails } = profile;
