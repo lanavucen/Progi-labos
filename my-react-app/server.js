@@ -28,6 +28,7 @@ app.use(passport.session());
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const pool = new Pool({
   connectionString: IS_PRODUCTION ? process.env.DATABASE_URL : `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`,
@@ -98,14 +99,14 @@ app.get('/api/auth/google',
 
 app.get('/api/auth/google/callback',
   passport.authenticate('google', { 
-    failureRedirect: `${process.env.FRONTEND_URL}/Prijava`,
+    failureRedirect: `${FRONTEND_URL}/Prijava`,
     session: false
   }),
   (req, res) => {
     const user = req.user;
     const token = jwt.sign({ email: user.email, name: user.name, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+
+    res.redirect(`${FRONTEND_URL}/auth/callback?token=${token}`);
   }
 );
 
