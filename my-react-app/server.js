@@ -26,17 +26,19 @@ app.use(passport.session());
   port: 5433
 });*/
 
-const isProduction = process.env.NODE_ENV === 'production';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 const pool = new Pool({
-  connectionString: isProduction ? process.env.DATABASE_URL : `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`,
+  connectionString: IS_PRODUCTION ? process.env.DATABASE_URL : `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`,
   
-  ssl: isProduction ? { rejectUnauthorized: false } : false
+  ssl: IS_PRODUCTION ? { rejectUnauthorized: false } : false
 });
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: `${BACKEND_URL}/api/auth/google/callback`
   },
   async (accessToken, refreshToken, profile, done) => {
     const { id, displayName, emails } = profile;
@@ -77,8 +79,12 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (email, done) => {
   try {
-    const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    done(null, user.rows[0]);
+    const userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (userResult.rows.length > 0) {
+      done(null, userResult.rows[0]);
+    } else {
+      done(null, false);
+    }
   } catch (err) {
     done(err, null);
   }
@@ -86,8 +92,7 @@ passport.deserializeUser(async (email, done) => {
 
 app.get('/api/auth/google',
   passport.authenticate('google', { 
-    scope: ['profile', 'email'],
-    callbackURL: `${process.env.BACKEND_URL}/api/auth/google/callback`
+    scope: ['profile', 'email']
   })
 );
 
