@@ -37,7 +37,9 @@ class rasporediPosude{
       return {
         razina: 0,
         sljedeciDatum: new Date(Date.now() - 86400000).toISOString(), 
-        zadnjiPokusaj: null
+        zadnjiPokusaj: null,
+        tocni: 0,
+        netocni: 0
       };
     }
     return this.wordProgress[wordId];
@@ -53,8 +55,10 @@ class rasporediPosude{
 
     if (!tocanOdgovor) {
       progress.razina = 0;
+      progress.netocni = (progress.netocni || 0) + 1;
     } else {
       progress.razina = Math.min(progress.razina + 1, 5);
+      progress.tocni = (progress.tocni || 0) + 1; 
     }
 
     const intervalMinuta = interval[progress.razina];
@@ -70,7 +74,9 @@ class rasporediPosude{
 
     return {
       novaRazina: progress.razina,
-      posuda: `${progress.razina}`
+      posuda: `${progress.razina}`,
+      tocni: progress.tocni,
+      netocni: progress.netocni
     };
   }
 
