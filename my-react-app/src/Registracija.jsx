@@ -2,6 +2,8 @@ import "./css/Registracija.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function Registracija() {
   const navigate = useNavigate();
 
@@ -43,7 +45,7 @@ function Registracija() {
 
     try {
       const body = { name, email, password };
-      const response = await fetch("/api/registracija", {
+      const response = await fetch(`${API_URL}/api/registracija`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)

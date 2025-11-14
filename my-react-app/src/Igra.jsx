@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import rasporediPosude from "./Posude.jsx";
 
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 export default function Igra() {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ export default function Igra() {
     }
     
     try {
-      const response = await fetch(`/api/words?language_id=${langId}&mod=${mod}`, {
+      const response = await fetch(`${API_URL}/api/words?language_id=${langId}&mod=${mod}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -71,7 +72,7 @@ export default function Igra() {
       return;
     }
     try {
-      const response = await fetch(`/api/words?language_id=${langId}&mod=${mod}&word_id=${wordId}`, {
+      const response = await fetch(`${API_URL}/api/words?language_id=${langId}&mod=${mod}&word_id=${wordId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -118,7 +119,7 @@ export default function Igra() {
     
     try {
       const wordId = currentWord.word_id;
-      const res = await fetch(`/api/words/${wordId}?language_id=${rjecnik}&mod=${mod}`, {
+      const res = await fetch(`${API_URL}/api/words/${wordId}?language_id=${rjecnik}&mod=${mod}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const correctAnswer = await res.json();

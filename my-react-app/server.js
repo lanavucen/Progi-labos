@@ -18,12 +18,20 @@ app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUniniti
 app.use(passport.initialize());
 app.use(passport.session());
 
-const pool = new Pool({
+/*const pool = new Pool({
   user: "postgres",
   host: "localhost",
   database: "progi",
   password: "bazepodataka",
   port: 5433
+});*/
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+const pool = new Pool({
+  connectionString: isProduction ? process.env.DATABASE_URL : `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`,
+  
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
 passport.use(new GoogleStrategy({
@@ -129,16 +137,34 @@ app.post("/api/registracija", async (req, res) => {
 app.post("/api/prijava", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await pool.query("SELECT name, email, password, role FROM users WHERE email = $1", [email]);
+    const userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
 
-    if (user.rows.length === 0) {
+    if (userResult.rows.length === 0) {
       return res.status(401).json("Korisnik ne postoji");
     }
 
-    if (user.rows[0].password !== password) {
+    const user = userResult.rows[0];
+
+    if (user.password !== password) {
       return res.status(401).json("Pogrešna lozinka");
     }
-    res.json({ message: "Prijava uspješna", user: user.rows[0] });
+
+    const token = jwt.sign(
+      { email: user.email, name: user.name, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({ 
+      message: "Prijava uspješna", 
+      token: token, 
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role
+      } 
+    });
+
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Greška na serveru");
@@ -351,23 +377,28 @@ app.put("/api/words/:id", verifyToken, async (req, res) => {
 
 app.put('/api/users/:email/name', verifyToken, async (req, res) => {
   try {
-    const { email } = req.params;
-    const { newName } = req.body;
+    const targetEmail = req.params.email;
+    const requesterEmail = req.user.email;
 
+    if (requesterEmail !== targetEmail && req.user.role !== 2) {
+      return res.status(403).send("Zabranjeno: Nemate dopuštenje za izmjenu ovog korisnika.");
+    }
+
+    const { newName } = req.body;
     if (!newName || newName.length < 2 || newName.length > 50) {
       return res.status(400).send("Ime mora imati između 2 i 50 znakova.");
     }
 
     const updateUser = await pool.query(
       "UPDATE users SET name = $1 WHERE email = $2 RETURNING name, email, role",
-      [newName, email]
+      [newName, targetEmail]
     );
 
     if (updateUser.rowCount === 0) {
       return res.status(404).json("Korisnik nije pronađen.");
     }
 
-    res.json({ message: "Ime uspješno promijenjeno.", user: updateUser.rows[0] });
+    res.json(updateUser.rows[0]);
 
   } catch (err) {
     console.error(err.message);
@@ -377,16 +408,21 @@ app.put('/api/users/:email/name', verifyToken, async (req, res) => {
 
 app.put('/api/users/:email/password', verifyToken, async (req, res) => {
   try {
-    const { email } = req.params;
-    const { newPassword } = req.body;
+    const targetEmail = req.params.email;
+    const requesterEmail = req.user.email;
 
+    if (requesterEmail !== targetEmail) {
+      return res.status(403).send("Zabranjeno: Možete promijeniti samo vlastitu lozinku.");
+    }
+
+    const { newPassword } = req.body;
     if (!newPassword || newPassword.length < 4 || newPassword.length > 100) {
       return res.status(400).send("Lozinka mora imati između 4 i 100 znakova.");
     }
 
     const updateUser = await pool.query(
       "UPDATE users SET password = $1 WHERE email = $2",
-      [newPassword, email]
+      [newPassword, targetEmail]
     );
 
     if (updateUser.rowCount === 0) {

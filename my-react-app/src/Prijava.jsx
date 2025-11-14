@@ -2,6 +2,8 @@ import "./css/Prijava.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function Prijava() {
   const navigate = useNavigate();
 
@@ -15,22 +17,29 @@ function Prijava() {
 
     try {
       const body = { email, password };
-      const response = await fetch("/api/prijava", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/prijava`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        setError(errorText || "Prijava nije uspjela.");
+        return;
+      }
+
       const data = await response.json();
 
-      if (response.ok) {
+      if (data.token && data.user) {
         alert("Prijava uspješna!");
 
         localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
 
         navigate("/Profil");
       } else {
-        setError(data);
+        setError("Odgovor servera nije ispravan.");
       }
     } catch (err) {
       console.error(err.message);

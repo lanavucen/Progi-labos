@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./css/UpravljanjeUlogama.css"; 
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function UpravljanjeUlogama() {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
@@ -11,7 +13,7 @@ function UpravljanjeUlogama() {
   const fetchUsers = async (admin) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`/api/admin/users?adminEmail=${admin.email}`, {
+      const response = await fetch(`${API_URL}/api/admin/users?adminEmail=${admin.email}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -52,7 +54,7 @@ function UpravljanjeUlogama() {
     if (!window.confirm(`Jeste li sigurni da želite promijeniti ulogu korisniku ${targetEmail}?`)) return;
 
     try {
-      const response = await fetch(`/api/users/${targetEmail}/role`, {
+      const response = await fetch(`${API_URL}/api/users/${targetEmail}/role`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

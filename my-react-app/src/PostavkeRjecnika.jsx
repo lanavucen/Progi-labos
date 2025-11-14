@@ -2,6 +2,8 @@ import "./css/PostavkeRjecnika.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function PostavkeRjecnika() {
   const navigate = useNavigate();
 
@@ -19,7 +21,7 @@ function PostavkeRjecnika() {
   const fetchLanguages = async () => {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch('/api/languages', {
+      const response = await fetch(`${API_URL}/api/languages`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -36,7 +38,7 @@ function PostavkeRjecnika() {
       return;
     }
     try {
-      const response = await fetch(`/api/words?language_id=${langId}`, {
+      const response = await fetch(`${API_URL}/api/words?language_id=${langId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -69,7 +71,7 @@ function PostavkeRjecnika() {
   const handleAddLanguage_func = async () => {
     const token = localStorage.getItem("token");
     if (!newLanguageName.trim()) return;
-    await fetch('/api/languages', {
+    await fetch(`${API_URL}/api/languages`, {
       method: 'POST',
       headers: {
         "Content-Type": 'application/json',
@@ -83,7 +85,7 @@ function PostavkeRjecnika() {
   const handleDeleteLanguage_func = async (langId) => {
     const token = localStorage.getItem("token");
     if (!window.confirm("Jeste li sigurni? Brisanje jezika će obrisati i sve povezane riječi.")) return;
-    await fetch(`/api/languages/${langId}`, {
+    await fetch(`${API_URL}/api/languages/${langId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -93,7 +95,7 @@ function PostavkeRjecnika() {
   const handleAddWord_func = async () => {
     const token = localStorage.getItem("token");
     if (!newWord.text.trim() || !selectedLanguageId) return;
-    await fetch('/api/words', {
+    await fetch(`${API_URL}/api/words`, {
       method: 'POST',
       headers: {
         "Content-Type": 'application/json',
@@ -112,7 +114,7 @@ function PostavkeRjecnika() {
   const handleDeleteWord_func = async (wordId) => {
     const token = localStorage.getItem("token");
     if (!window.confirm("Jeste li sigurni da želite obrisati ovu riječ?")) return;
-    await fetch(`/api/words/${wordId}`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/words/${wordId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -124,7 +126,7 @@ function PostavkeRjecnika() {
   const handleUpdateWord_func = async () => {
     const token = localStorage.getItem("token");
     if (!editingWord.word_text.trim()) return;
-    await fetch(`/api/words/${editingWord.word_id}`, {
+    await fetch(`${API_URL}/api/words/${editingWord.word_id}`, {
       method: 'PUT',
       headers: {
         "Content-Type": 'application/json',
