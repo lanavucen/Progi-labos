@@ -92,8 +92,12 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 SESSION_SECRET=a_random_secret_string_for_sessions
 JWT_SECRET=another_random_secret_for_jwt
-REACT_APP_BACKEND_URL=http://localhost:3001
-VITE_API_URL=http://localhost:3001
+
+DB_USER=postgres
+DB_PASSWORD=bazepodataka
+DB_HOST=localhost
+DB_PORT=5433
+DB_DATABASE=progi
 
 
 Ako ste kreirali bazu iz trenutne verzije ovih uputa preskočite ove korake i idite na 6.1
@@ -145,6 +149,30 @@ http://localhost:5173
 6.9. Kliknite "Create". Pojavit će se prozorčić s vašim ključevima! Kopirajte vrijednosti za "Your Client ID" i "Your Client Secret". To su vrijednosti koje trebate zalijepiti u svoju .env datoteku.
 
 
+
+
+
+Stranica na internetu:
+
+https://progi-frontend-jgmz.onrender.com/
+
+profili za testiranje:
+Korijenski administrator:
+
+email: koradmin@gmail.com 
+password: koradmin
+
+
+Administrator:
+
+email: admin@gmail.com
+password: admin
+
+
+Korisnik:
+
+email: user@gmail.com
+password: user
 
 
 

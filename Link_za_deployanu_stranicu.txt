@@ -1,1 +1,19 @@
 https://progi-frontend-jgmz.onrender.com/
+
+profili za testiranje:
+
+Korijenski administrator:
+
+email: koradmin@gmail.com 
+password: koradmin
+
+
+Administrator:
+email: admin@gmail.com
+password: admin
+
+
+Korisnik
+
+email: user@gmail.com
+password: user
