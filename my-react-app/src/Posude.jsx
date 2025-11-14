@@ -72,11 +72,19 @@ class rasporediPosude{
 
     this.setWordProgress(wordId, progress);
 
+    let postotak;
+    if (((progress.tocni || 0) + (progress.netocni || 0)) > 0){
+      postotak = progress.tocni / ((progress.tocni || 0) + (progress.netocni || 0)) * 100;
+    } else{
+      postotak = 0;
+    }
+
     return {
       novaRazina: progress.razina,
       posuda: `${progress.razina}`,
       tocni: progress.tocni,
-      netocni: progress.netocni
+      netocni: progress.netocni,
+      postotak: postotak
     };
   }
 
