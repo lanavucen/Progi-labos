@@ -17,7 +17,7 @@ function Prijava() {
 
     try {
       const body = { email, password };
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/prijava`, {
+      const response = await fetch(`${API_URL}/api/prijava`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
@@ -45,6 +45,10 @@ function Prijava() {
       console.error(err.message);
       setError("Nije moguće spojiti se na server.");
     }
+  };
+  
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_URL}/api/auth/google`;
   };
 
   return (
@@ -78,7 +82,7 @@ function Prijava() {
         Submit
       </button>
 
-      <button className="googlebutton" onClick={() => {window.location.href = "http://localhost:3001/api/auth/google";}}>
+      <button className="googlebutton" onClick={handleGoogleLogin}>
         Prijavi se s Googleom
       </button>
 
