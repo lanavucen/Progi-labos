@@ -34,12 +34,10 @@ const pool = new Pool({
   ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
-const callbackURL = process.env.NODE_ENV === 'production' ? `${process.env.BACKEND_URL}/api/auth/google/callback` : '/api/auth/google/callback';
-
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: callbackURL
+    callbackURL: "https://progi-backend.onrender.com/api/auth/google/callback" 
   },
   async (accessToken, refreshToken, profile, done) => {
     const { id, displayName, emails } = profile;
@@ -97,7 +95,7 @@ app.get('/api/auth/google/callback',
     const user = req.user;
     const token = jwt.sign({ email: user.email, name: user.name, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
     
-    res.redirect(`http://localhost:5173/auth/callback?token=${token}`);
+    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
   }
 );
 
