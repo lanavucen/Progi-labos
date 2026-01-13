@@ -365,7 +365,6 @@ app.post("/api/words", verifyToken, async (req, res) => {
     const newWord = newWordResult.rows[0];
 
     const ttsUrl = `https://voicerss-text-to-speech.p.rapidapi.com/?key=${process.env.VOICERSS_API_KEY}&hl=en-us&c=MP3&f=44khz_16bit_stereo&src=${encodeURIComponent(word_text)}`;
-
     const ttsOptions = {
       method: 'GET',
       headers: {
@@ -377,24 +376,24 @@ app.post("/api/words", verifyToken, async (req, res) => {
     const ttsResponse = await fetch(ttsUrl, ttsOptions);
     
     if (!ttsResponse.ok) {
-      console.error(`TTS API greška za riječ '${word_text}'. Status: ${ttsResponse.status}`);
+      console.error(`TTS API greška za riječ '${word_text}'.`);
       return res.status(201).json(newWord);
     }
 
     const audioArrayBuffer = await ttsResponse.arrayBuffer();
     
-    const audioBuffer = Buffer.from(audioArrayBuffer);
+    const audioHexString = Buffer.from(audioArrayBuffer).toString('hex');
 
     await pool.query(
-      "UPDATE words SET pronounciation = $1 WHERE word_id = $2",
-      [audioBuffer, newWord.word_id]
+      "UPDATE words SET pronounciation = decode($1, 'hex') WHERE word_id = $2",
+      [audioHexString, newWord.word_id]
     );
     
-    console.log(`Audio (Buffer) spremljen u bazu za riječ: ${word_text}`);
+    console.log(`Audio (preko decode('hex')) spremljen u bazu za riječ: ${word_text}`);
     res.status(201).json(newWord);
 
   } catch (err) {
-    console.error("Greška u /api/words endpointu:", err.message);
+    console.error("Greška u /api/words endpointu:", err.message, err.stack);
     res.status(500).json({ error: "Interna greška servera." });
   }
 });
