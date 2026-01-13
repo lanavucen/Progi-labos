@@ -352,13 +352,49 @@ app.get("/api/words/:id", verifyToken, async (req, res) => {
 app.post("/api/words", verifyToken, async (req, res) => {
   try {
     const { word_text, language_id, translation_to_croatian, phrases } = req.body;
-    const newWord = await pool.query(
-      "INSERT INTO words (word_text, language_id, translation_to_croatian, phrases) VALUES ($1, $2, $3, $4) RETURNING *",
+
+    const newWordResult = await pool.query(
+      "INSERT INTO words (word_text, language_id, translation_to_croatian, phrases) VALUES ($1, $2, $3, $4) ON CONFLICT (word_text, language_id) DO NOTHING RETURNING *",
       [word_text, language_id, translation_to_croatian, phrases]
     );
-    res.status(201).json(newWord.rows[0]);
+
+    if (newWordResult.rows.length === 0) {
+        return res.status(200).json({ message: "Riječ već postoji, preskačem TTS." });
+    }
+    
+    const newWord = newWordResult.rows[0];
+
+    const ttsUrl = `https://voicerss-text-to-speech.p.rapidapi.com/?key=${process.env.VOICERSS_API_KEY}&hl=en-us&c=MP3&f=44khz_16bit_stereo&src=${encodeURIComponent(word_text)}`;
+
+    const ttsOptions = {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': process.env.TTS_RAPIDAPI_KEY,
+        'X-RapidAPI-Host': 'voicerss-text-to-speech.p.rapidapi.com'
+      }
+    };
+    
+    console.log(`Pokušavam dohvatiti TTS za riječ: ${word_text}`);
+    const ttsResponse = await fetch(ttsUrl, ttsOptions);
+    
+    if (!ttsResponse.ok) {
+      console.error(`TTS API nije uspio generirati audio za riječ '${word_text}'. Status: ${ttsResponse.status}`);
+      return res.status(201).json(newWord);
+    }
+
+    const audioBuffer = await ttsResponse.arrayBuffer();
+
+    console.log(`Spremam audio u bazu za riječ: ${word_text}`);
+    await pool.query(
+      "UPDATE words SET pronounciation = $1 WHERE word_id = $2",
+      [Buffer.from(audioBuffer), newWord.word_id]
+    );
+
+    res.status(201).json(newWord);
+
   } catch (err) {
-    res.status(500).json(err.message);
+    console.error("Greška pri dodavanju riječi i TTS-a:", err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
