@@ -374,29 +374,28 @@ app.post("/api/words", verifyToken, async (req, res) => {
       }
     };
     
-    console.log(`Pokušavam dohvatiti TTS za riječ: ${word_text}`);
     const ttsResponse = await fetch(ttsUrl, ttsOptions);
     
     if (!ttsResponse.ok) {
-      console.error(`TTS API nije uspio generirati audio za riječ '${word_text}'. Status: ${ttsResponse.status}`);
+      console.error(`TTS API greška za riječ '${word_text}'. Status: ${ttsResponse.status}`);
       return res.status(201).json(newWord);
     }
 
-    const audioBuffer = await ttsResponse.arrayBuffer();
-
-    console.log(`Spremam audio u bazu za riječ: ${word_text}`);
+    const audioArrayBuffer = await ttsResponse.arrayBuffer();
     
-    const audioHex = '\\x' + Buffer.from(audioBuffer).toString('hex');
+    const audioBuffer = Buffer.from(audioArrayBuffer);
+
     await pool.query(
       "UPDATE words SET pronounciation = $1 WHERE word_id = $2",
-      [audioHex, newWord.word_id]
+      [audioBuffer, newWord.word_id]
     );
-
+    
+    console.log(`Audio (Buffer) spremljen u bazu za riječ: ${word_text}`);
     res.status(201).json(newWord);
 
   } catch (err) {
-    console.error("Greška pri dodavanju riječi i TTS-a:", err.message);
-    res.status(500).json({ error: err.message });
+    console.error("Greška u /api/words endpointu:", err.message);
+    res.status(500).json({ error: "Interna greška servera." });
   }
 });
 
