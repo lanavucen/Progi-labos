@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import session from "express-session";
 import "dotenv/config";
 import { verifyToken } from './authMiddleware.js';
+import multer from 'multer';
 
 const { Pool } = pg;
 const app = express();
@@ -25,6 +26,8 @@ app.use(passport.session());
   password: "bazepodataka",
   port: 5433
 });*/
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -295,6 +298,24 @@ app.delete("/api/languages/:id", verifyToken, async (req, res) => {
   }
 });
 
+app.get("/api/words/:id/pronunciation", verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query("SELECT pronounciation FROM words WHERE word_id = $1", [id]);
+    
+    if (result.rows.length > 0 && result.rows[0].pronounciation) {
+      res.set('Content-Type', 'audio/mpeg');
+      res.send(result.rows[0].pronounciation);
+    } else {
+      res.status(404).send("Audio zapis nije pronađen za ovu riječ.");
+    }
+  } catch (err) 
+  {
+    console.error("Greška pri dohvaćanju izgovora:", err.message);
+    res.status(500).json({ error: "Greška na serveru pri dohvaćanju zvuka." });
+  }
+});
+
 app.get("/api/words", verifyToken, async (req, res) => {
   try {
     const { language_id, mod, word_id } = req.query;
@@ -349,25 +370,6 @@ app.get("/api/words/:id", verifyToken, async (req, res) => {
   }
 });
 
-app.get("/api/words/:id/pronunciation", verifyToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await pool.query("SELECT pronounciation FROM words WHERE word_id = $1", [id]);
-    
-    if (result.rows.length > 0 && result.rows[0].pronounciation) {
-      // Postavljamo Content-Type da preglednik zna da se radi o audio zapisu
-      res.set('Content-Type', 'audio/mpeg');
-      // Šaljemo sirove binarne podatke iz baze
-      res.send(result.rows[0].pronounciation);
-    } else {
-      res.status(404).send("Audio zapis nije pronađen za ovu riječ.");
-    }
-  } catch (err)
-  {
-    console.error("Greška pri dohvaćanju izgovora:", err.message);
-    res.status(500).json({ error: "Greška na serveru pri dohvaćanju zvuka." });
-  }
-});
 
 app.post("/api/words", verifyToken, async (req, res) => {
   try {
@@ -500,6 +502,62 @@ app.put('/api/users/:email/password', verifyToken, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Greška na serveru");
+  }
+});
+
+
+app.post("/api/pronunciation/check", verifyToken, upload.single('audio'), async (req, res) => {
+  const { word_text } = req.body;
+  const audioFile = req.file;
+
+  if (!word_text || !audioFile) {
+    return res.status(400).send("Nedostaje tekst riječi ili audio zapis.");
+  }
+  
+  try {
+    const audioBase64 = audioFile.buffer.toString('base64');
+    const requestBody = {
+      audio_base64: audioBase64,
+      expected_text: word_text,
+      audio_format: "webm" 
+    };
+    const rapidApiOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-rapidapi-host': 'scripted-speech-assessment1.p.rapidapi.com',
+        'x-rapidapi-key': process.env.PRONUNCIATION_API_KEY
+      },
+      body: JSON.stringify(requestBody)
+    };
+
+    const rapidApiResponse = await fetch('https://scripted-speech-assessment1.p.rapidapi.com/speech-assessment/scripted/us', rapidApiOptions);
+    
+    if (!rapidApiResponse.ok) {
+      const errorBody = await rapidApiResponse.text();
+      console.error("RapidAPI greška (Pronunciation):", { status: rapidApiResponse.status, body: errorBody });
+      throw new Error("RapidAPI nije dostupan.");
+    }
+
+    const scoreData = await rapidApiResponse.json();
+    
+    // Nema više potrebe za logiranjem cijelog objekta
+    // console.log("Odgovor od Pronunciation API-ja:", JSON.stringify(scoreData, null, 2));
+
+    // --- KLJUČNI ISPRAVAK ---
+    // Provjeravamo postoji li putanja do ocjene
+    if (scoreData && scoreData.pronunciation && scoreData.pronunciation.overall_score !== undefined) {
+      // API vraća ocjenu od 0-100.
+      res.json({ score: scoreData.pronunciation.overall_score / 10 });
+    } else {
+      // Ako struktura nije očekivana, baci grešku
+      console.error("API nije vratio očekivanu strukturu. Primljen objekt:", scoreData);
+      throw new Error("API nije vratio očekivanu 'pronunciation.overall_score' ocjenu.");
+    }
+
+  } catch (err) {
+    console.error("Greška pri spajanju na API za provjeru izgovora:", err.message);
+    res.status(503).json({ error: "Nemogućnost spajanja sa servisom RapidAPI, igra se nastavlja bez ocjene izgovora." });
   }
 });
 

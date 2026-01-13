@@ -1,6 +1,6 @@
 import "./css/Igra.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import rasporediPosude from "./Posude.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -19,7 +19,11 @@ export default function Igra() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [result, setResult] = useState(null);
 
-
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedAudio, setRecordedAudio] = useState(null);
+  const mediaRecorderRef = useRef(null);
+  
+  const [audioSrc, setAudioSrc] = useState('');
  
   const raspored = useMemo(() => {
     if (!rjecnik || !user) return null;
@@ -144,11 +148,106 @@ export default function Igra() {
     setSelectedAnswer(null);
     setResult(null);
     setCurrentWord(null);
+    setRecordedAudio(null);
     generateQuestion();
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      
+      const audioChunks = [];
+      mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        setRecordedAudio(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      setRecordedAudio(null);
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) { alert("Nije moguće pristupiti mikrofonu."); }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const checkPronunciation = async () => {
+    if (!recordedAudio) return;
+    
+    const formData = new FormData();
+    formData.append('audio', recordedAudio, 'pronunciation.webm');
+    formData.append('word_text', currentWord.word_text);
+    
+    setResult("Šaljem na provjeru...");
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/api/pronunciation/check`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData,
+        });
+
+        const data = await response.json();
+        
+        if (response.status === 503) {
+            setResult(data.error);
+            raspored.obradi(currentWord.word_id, true);
+        } else if (response.ok) {
+            const score = data.score.toFixed(1);
+            const isCorrect = score >= 7.0;
+            const srsResult = raspored.obradi(currentWord.word_id, isCorrect);
+            setResult(`Ocjena izgovora: ${score}/10. ${isCorrect ? 'Odlično!' : 'Pokušaj opet!'} Nova razina: ${srsResult.posuda}.`);
+        } else {
+            setResult("Došlo je do greške pri provjeri.");
+        }
+    } catch (err) {
+        setResult("Došlo je do greške pri spajanju.");
+    }
+    const filtrirane = raspored.filtrirajRijeci(allWords);
+    setWords(filtrirane);
+  };
+  
   const isAnswered = result && !result.includes("Please select");
 
+  useEffect(() => {
+    const fetchAudio = async () => {
+      if (mod === 'mod4' && currentWord) {
+        const token = localStorage.getItem("token");
+        try {
+          const response = await fetch(`${API_URL}/api/words/${currentWord.word_id}/pronunciation`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (!response.ok) throw new Error('Audio not found');
+
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+          setAudioSrc(audioUrl);
+        } catch (err) {
+          console.error("Greška pri dohvaćanju zvuka:", err);
+          setAudioSrc('');
+        }
+      }
+    };
+
+    fetchAudio();
+
+    return () => {
+      if (audioSrc) {
+        URL.revokeObjectURL(audioSrc);
+      }
+    };
+  }, [currentWord, mod]);
+  
   return (
     <div className="game">
       <header>
@@ -160,45 +259,91 @@ export default function Igra() {
       <div className="game-container second-color">
         {currentWord ? (
           <>
-            <div className="question">
-              {mod === "mod1" 
-                ? <>Što je hrvatski prijevod za riječ <strong>{currentQuestion}</strong>?</>
-                : <>Što je engleski prijevod za riječ <strong>{currentQuestion}</strong>?</>
-              }
-            </div>
+            {mod === 'mod4' ? (
+              <>
+                <div className="question">
+                  Poslušaj i izgovori riječ: <strong>{currentWord.word_text}</strong>
+                </div>
+                
+                <audio 
+                  src={audioSrc} 
+                  controls 
+                  controlsList="nodownload" 
+                />
+                
+                <div className="buttons">
+                  <button 
+                    className="submit-button third-color" 
+                    onClick={isRecording ? stopRecording : startRecording} 
+                    disabled={isAnswered}
+                  >
+                    {isRecording ? '⏹️ Zaustavi snimanje' : '🎙️ Snimi izgovor'}
+                  </button>
 
-            <ul className="answers">
-              {choices?.map((ans, index) => (
-                <li
-                  key={index}
-                  className={`answer third-color ${selectedAnswer === ans ? "selected" : ""}`}
-                  onClick={() => !isAnswered && setSelectedAnswer(ans)}
+                  {recordedAudio && !result && (
+                    <button 
+                      className="submit-button third-color" 
+                      onClick={checkPronunciation}
+                    >
+                      Provjeri
+                    </button>
+                  )}
+                </div>
+
+                {result && <div className="result">{result}</div>}
+
+                <button 
+                  id="next" 
+                  className="submit-button third-color next-button" 
+                  onClick={handleNext} 
+                  disabled={!isAnswered}
                 >
-                  {ans}
-                </li>
-              ))}
-            </ul>
+                  Sljedeće
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="question">
+                  {mod === "mod1" 
+                    ? <>Što je hrvatski prijevod za riječ <strong>{currentQuestion}</strong>?</>
+                    : <>Što je engleski prijevod za riječ <strong>{currentQuestion}</strong>?</>
+                  }
+                </div>
 
-            <div className="buttons">
-              <button
-                className="submit-button third-color"
-                onClick={handleSubmit}
-                disabled={isAnswered}
-              >
-                Potvrdi
-              </button>
+                <ul className="answers">
+                  {choices?.map((ans, index) => (
+                    <li
+                      key={index}
+                      className={`answer third-color ${selectedAnswer === ans ? "selected" : ""}`}
+                      onClick={() => !isAnswered && setSelectedAnswer(ans)}
+                    >
+                      {ans}
+                    </li>
+                  ))}
+                </ul>
 
-              <button
-                id="next"
-                className="submit-button third-color next-button"
-                onClick={handleNext}
-                disabled={!isAnswered}
-              >
-                Sljedeće
-              </button>
-            </div>
+                <div className="buttons">
+                  <button
+                    className="submit-button third-color"
+                    onClick={handleSubmit}
+                    disabled={isAnswered}
+                  >
+                    Potvrdi
+                  </button>
 
-            {result && <div className="result">{result}</div>}
+                  <button
+                    id="next"
+                    className="submit-button third-color next-button"
+                    onClick={handleNext}
+                    disabled={!isAnswered}
+                  >
+                    Sljedeće
+                  </button>
+                </div>
+
+                {result && <div className="result">{result}</div>}
+              </>
+            )}
           </>
         ) : (
           <div className="question">
@@ -206,7 +351,7 @@ export default function Igra() {
             <button 
               className="third-color" 
               onClick={() => navigate("/postavkeIgre")}
-              style={{ marginTop: "20px", padding: "10px 20px" }}
+              style={{ marginTop: "20px", padding: "10px 20px", cursor: 'pointer' }}
             >
               Natrag na postavke
             </button>
