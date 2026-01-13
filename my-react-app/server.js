@@ -349,6 +349,26 @@ app.get("/api/words/:id", verifyToken, async (req, res) => {
   }
 });
 
+app.get("/api/words/:id/pronunciation", verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query("SELECT pronounciation FROM words WHERE word_id = $1", [id]);
+    
+    if (result.rows.length > 0 && result.rows[0].pronounciation) {
+      // Postavljamo Content-Type da preglednik zna da se radi o audio zapisu
+      res.set('Content-Type', 'audio/mpeg');
+      // Šaljemo sirove binarne podatke iz baze
+      res.send(result.rows[0].pronounciation);
+    } else {
+      res.status(404).send("Audio zapis nije pronađen za ovu riječ.");
+    }
+  } catch (err)
+  {
+    console.error("Greška pri dohvaćanju izgovora:", err.message);
+    res.status(500).json({ error: "Greška na serveru pri dohvaćanju zvuka." });
+  }
+});
+
 app.post("/api/words", verifyToken, async (req, res) => {
   try {
     const { word_text, language_id, translation_to_croatian, phrases } = req.body;
