@@ -385,9 +385,11 @@ app.post("/api/words", verifyToken, async (req, res) => {
     const audioBuffer = await ttsResponse.arrayBuffer();
 
     console.log(`Spremam audio u bazu za riječ: ${word_text}`);
+    
+    const audioHex = '\\x' + Buffer.from(audioBuffer).toString('hex');
     await pool.query(
       "UPDATE words SET pronounciation = $1 WHERE word_id = $2",
-      [Buffer.from(audioBuffer), newWord.word_id]
+      [audioHex, newWord.word_id]
     );
 
     res.status(201).json(newWord);
