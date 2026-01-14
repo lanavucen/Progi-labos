@@ -18,6 +18,7 @@ export default function Igra() {
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [result, setResult] = useState(null);
+  const [writtenAnswer, setWrittenAnswer] = useState('');
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordedAudio, setRecordedAudio] = useState(null);
@@ -96,7 +97,7 @@ export default function Igra() {
     const targetWord = words[index];
     setCurrentWord(targetWord);
     setCurrentQuestion(mod === "mod1" ? targetWord.word_text : targetWord.translation_to_croatian);
-    if (mod === 'mod4') {
+    if (mod === 'mod3' || mod === 'mod4') {
       fetchAudio(targetWord.word_id);
     }
   };
@@ -147,12 +148,32 @@ export default function Igra() {
       setResult("Error fetching the answer. Try again.");
     }
   };
+  
+  const handleSubmitSpelling = () => {
+    if (!writtenAnswer.trim()) {
+      setResult("Molimo upišite riječ.");
+      return;
+    }
+
+    const isCorrect = writtenAnswer.trim().toLowerCase() === currentWord.word_text.toLowerCase();
+    const srsResult = raspored.obradi(currentWord.word_id, isCorrect);
+
+    if (isCorrect) {
+      setResult(`Točno! Nova razina: ${srsResult.posuda}.`);
+    } else {
+      setResult(`Netočno. Ispravna riječ je bila "${currentWord.word_text}". Nova razina: ${srsResult.posuda}.`);
+    }
+
+    const filtrirane = raspored.filtrirajRijeci(allWords);
+    setWords(filtrirane);
+  };
 
   const handleNext = () => {
     setSelectedAnswer(null);
     setResult(null);
     setCurrentWord(null);
     setRecordedAudio(null);
+    setWrittenAnswer('');
     generateQuestion();
   };
 
@@ -263,7 +284,29 @@ export default function Igra() {
       <div className="game-container second-color">
         {currentWord ? (
           <>
-            {mod === 'mod4' ? (
+            {mod === 'mod3' ? (
+              <>
+                <div className="question">Poslušaj riječ i upiši što čuješ:</div>
+                {audioStatus === 'loading' && <p>Učitavam zvuk...</p>}
+                {audioStatus === 'error' && <p style={{color: 'red'}}>Greška pri učitavanju zvuka.</p>}
+                {audioStatus === 'loaded' && <audio src={audioSrc} controls controlsList="nodownload" />}
+                
+                <input
+                  type="text"
+                  className="spelling-input"
+                  placeholder="Upiši riječ..."
+                  value={writtenAnswer}
+                  onChange={(e) => setWrittenAnswer(e.target.value)}
+                  disabled={!!result}
+                />
+
+                <div className="buttons">
+                  <button className="submit-button third-color" onClick={handleSubmitSpelling} disabled={!!result}>Potvrdi</button>
+                  <button id="next" className="submit-button third-color next-button" onClick={handleNext} disabled={!result}>Sljedeće</button>
+                </div>
+                {result && <div className="result">{result}</div>}
+              </>
+            ) : mod === 'mod4' ? (
               <>
                 <div className="question">Poslušaj i izgovori riječ: <strong>{currentWord.word_text}</strong></div>
 
