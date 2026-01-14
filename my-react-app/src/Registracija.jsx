@@ -116,7 +116,11 @@ function Registracija() {
             setShowConsent(false);
             submitRegistration();
           }}
-          onDecline={() => setShowConsent(false)}
+          onDecline={() => 
+            setShowConsent(false);
+            alert("Registracija nije dovršena, molimo prihvatite privolu o podatcima.");
+            navigate("/Registracija");
+          }
         />
       )}
     </div>
