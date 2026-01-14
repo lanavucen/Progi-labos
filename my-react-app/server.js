@@ -541,16 +541,9 @@ app.post("/api/pronunciation/check", verifyToken, upload.single('audio'), async 
 
     const scoreData = await rapidApiResponse.json();
     
-    // Nema više potrebe za logiranjem cijelog objekta
-    // console.log("Odgovor od Pronunciation API-ja:", JSON.stringify(scoreData, null, 2));
-
-    // --- KLJUČNI ISPRAVAK ---
-    // Provjeravamo postoji li putanja do ocjene
     if (scoreData && scoreData.pronunciation && scoreData.pronunciation.overall_score !== undefined) {
-      // API vraća ocjenu od 0-100.
       res.json({ score: scoreData.pronunciation.overall_score / 10 });
     } else {
-      // Ako struktura nije očekivana, baci grešku
       console.error("API nije vratio očekivanu strukturu. Primljen objekt:", scoreData);
       throw new Error("API nije vratio očekivanu 'pronunciation.overall_score' ocjenu.");
     }

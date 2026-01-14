@@ -1,6 +1,6 @@
 import "./css/Igra.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import rasporediPosude from "./Posude.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -24,6 +24,7 @@ export default function Igra() {
   const mediaRecorderRef = useRef(null);
   
   const [audioSrc, setAudioSrc] = useState('');
+  const [audioStatus, setAudioStatus] = useState('idle');
  
   const raspored = useMemo(() => {
     if (!rjecnik || !user) return null;
@@ -95,6 +96,9 @@ export default function Igra() {
     const targetWord = words[index];
     setCurrentWord(targetWord);
     setCurrentQuestion(mod === "mod1" ? targetWord.word_text : targetWord.translation_to_croatian);
+    if (mod === 'mod4') {
+      fetchAudio(targetWord.word_id);
+    }
   };
 
   useEffect(() => {
@@ -217,36 +221,36 @@ export default function Igra() {
     setWords(filtrirane);
   };
   
-  const isAnswered = result && !result.includes("Please select");
-
+  const fetchAudio = async (wordId) => {
+    setAudioStatus('loading');
+    setAudioSrc('');
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(`${API_URL}/api/words/${wordId}/pronunciation`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        cache: 'no-cache'
+      });
+      if (!response.ok) throw new Error('Audio not found on server');
+      const audioBlob = await response.blob();
+      if (audioBlob.size === 0) throw new Error("Prazan audio zapis.");
+      const audioUrl = URL.createObjectURL(audioBlob);
+      setAudioSrc(audioUrl);
+      setAudioStatus('loaded');
+    } catch (err) {
+      console.error("Greška pri dohvaćanju zvuka:", err);
+      setAudioStatus('error');
+    }
+  };
+  
+  const isAnswered = !!result;
+  
   useEffect(() => {
-    const fetchAudio = async () => {
-      if (mod === 'mod4' && currentWord) {
-        const token = localStorage.getItem("token");
-        try {
-          const response = await fetch(`${API_URL}/api/words/${currentWord.word_id}/pronunciation`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (!response.ok) throw new Error('Audio not found');
-
-          const audioBlob = await response.blob();
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setAudioSrc(audioUrl);
-        } catch (err) {
-          console.error("Greška pri dohvaćanju zvuka:", err);
-          setAudioSrc('');
-        }
-      }
-    };
-
-    fetchAudio();
-
     return () => {
       if (audioSrc) {
         URL.revokeObjectURL(audioSrc);
       }
     };
-  }, [currentWord, mod]);
+  }, [audioSrc]); 
   
   return (
     <div className="game">
@@ -261,16 +265,17 @@ export default function Igra() {
           <>
             {mod === 'mod4' ? (
               <>
-                <div className="question">
-                  Poslušaj i izgovori riječ: <strong>{currentWord.word_text}</strong>
-                </div>
-                
-                <audio 
-                  src={audioSrc} 
-                  controls 
-                  controlsList="nodownload" 
-                />
-                
+                <div className="question">Poslušaj i izgovori riječ: <strong>{currentWord.word_text}</strong></div>
+
+                {audioStatus === 'loading' && <p>Učitavam zvuk...</p>}
+                {audioStatus === 'error' && <p style={{color: 'red'}}>Greška pri učitavanju zvuka.</p>}
+                {audioStatus === 'loaded' && (
+                  <audio 
+                    src={audioSrc}
+                    controls 
+                    controlsList="nodownload"
+                  />
+                )}
                 <div className="buttons">
                   <button 
                     className="submit-button third-color" 
