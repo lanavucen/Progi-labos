@@ -149,6 +149,15 @@ http://localhost:5173
 6.9. Kliknite "Create". Pojavit će se prozorčić s vašim ključevima! Kopirajte vrijednosti za "Your Client ID" i "Your Client Secret". To su vrijednosti koje trebate zalijepiti u svoju .env datoteku.
 
 
+7.0. Stavite u .env datoteku ove ključeve, u slučaju da ne rade, probajte sami doći do tih ključeva na ovim linkovima:
+voicerss_api: https://rapidapi.com/voicerss/api/text-to-speech-1
+pronunciation_api_key: https://rapidapi.com/language-confidence-language-confidence-default/api/scripted-speech-assessment1
+
+
+TTS_RAPIDAPI_KEY=6448e15eefmsh981de6c7f7dbf44p1bc01bjsn36347a821c0f
+VOICERSS_API_KEY=59359c880552423aa85703867d74a14f
+PRONUNCIATION_API_KEY=6448e15eefmsh981de6c7f7dbf44p1bc01bjsn36347a821c0f
+
 
 
 
