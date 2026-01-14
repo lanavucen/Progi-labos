@@ -36,11 +36,12 @@ body{
 }
 
 .submitbutton{
-    margin-top: 1.5em;
     font-size:1.5em;
+    margin-top: 0px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 15em;
+    width: 7.5em;
     height: 2em;
     text-align: center;
     background-color: #ffa952 !important;
@@ -62,4 +63,12 @@ body{
 }
 .paragraphsPostavke{
     margin-top: 1.3em;
+}
+.buttonContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;          /* space between buttons */
+    width: 30em;
+    height: 5em;       /* gives vertical centering meaning */
 }

@@ -52,7 +52,7 @@ function PostavkeIgre() {
             alert("Morate biti prijavljeni da biste postavili igru.");
             navigate('/Prijava');
             return;
-        }
+        } 
 
         const savedMod = localStorage.getItem("selectedMod");
         const savedRjecnik = localStorage.getItem("selectedRjecnik");
@@ -100,9 +100,15 @@ function PostavkeIgre() {
 
             {error && <p className="error">{error}</p>}
 
-            <button className="submitbutton" onClick={handleSubmitPostavkeIgre}>
-                Igraj
-            </button>
+            <div className="buttonContainer">
+                <button className="submitbutton" onClick={handleSubmitPostavkeIgre}>
+                    Igraj
+                </button>
+                <button className="submitbutton" onClick={() => navigate("/")}>
+                    Natrag
+                </button>
+            </div>
+
         </div>
     );
 }

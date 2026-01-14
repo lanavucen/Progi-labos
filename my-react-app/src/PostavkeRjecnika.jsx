@@ -71,6 +71,17 @@ function PostavkeRjecnika() {
   const handleAddLanguage_func = async () => {
     const token = localStorage.getItem("token");
     if (!newLanguageName.trim()) return;
+
+    if (
+        languages.some(
+          (lang) =>
+            lang.language_name.toLowerCase() === newLanguageName.trim().toLowerCase()
+        )
+        ) {
+          alert("Rječnik s tim imenom već postoji!");
+          return;
+        }
+
     await fetch(`${API_URL}/api/languages`, {
       method: 'POST',
       headers: {

@@ -71,7 +71,7 @@ body{
     justify-content: center;
     align-items: center;
 }
-.upute{
+.upute, .uputeOpis{
     margin-right: 3em;
     margin-left: 3em;
     margin-top: 10em;
@@ -91,29 +91,36 @@ body{
     
 
 }
-.upute:h1{
+.upute h1, .uputeOpis h1{
     text-align: center;
     justify-content: center;
     align-items: center;
     word-wrap: break-word;
     overflow-wrap: anywhere;
 }
-.upute p{
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-    opacity: 0;
-    transition:opacity 0.5s ease-in-out;
+.uputeOpis p,
+.upute ol,
+.upute ul {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  text-align: left;
+  padding-left: 1.5em;
 }
 .upute:hover {
-    height: 300px;
+    height: 550px;
+    width: 350px;
     transform: scale(1.1);
 }
-.upute:hover p{
-    transition: 2.5s;
-    opacity: 1;
+
+.uputeOpis:hover {
+    height: 300px;
+    width: 350px;
+    transform: scale(1.1);
+}
+.uputeOpis:hover p,
+.upute:hover ol,
+.upute:hover ul {
+  opacity: 1;
 }
 
 .opis-text{
