@@ -224,14 +224,12 @@ function PostavkeRjecnika() {
                 onChange={(e) => setNewWord({ ...newWord, translation: e.target.value })}
               />
             </div>
-            <div className="info">
-              <p>Upiši frazu s kontekstom (odvojeno zarezom):</p>
-              <input
-                type="text"
-                value={newWord.phrases}
-                onChange={(e) => setNewWord({ ...newWord, phrases: e.target.value })}
-              />
-            </div>
+            {languages.find(l => l.language_id == selectedLanguageId)?.language_name.toLowerCase() !== 'engleski' && (
+              <div className="info">
+                <p>Upiši frazu s kontekstom (odvojeno zarezom):</p>
+                <input type="text" value={newWord.phrases} onChange={e => setNewWord({...newWord, phrases: e.target.value})} />
+              </div>
+            )}
             <button className="Button" onClick={handleAddWord_func}>
               Dodaj riječ
             </button>

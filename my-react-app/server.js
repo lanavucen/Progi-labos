@@ -373,8 +373,42 @@ app.get("/api/words/:id", verifyToken, async (req, res) => {
 
 app.post("/api/words", verifyToken, async (req, res) => {
   try {
-    const { word_text, language_id, translation_to_croatian, phrases } = req.body;
+    let { word_text, language_id, translation_to_croatian, phrases } = req.body;
 
+    const langResult = await pool.query("SELECT language_name FROM languages WHERE language_id = $1", [language_id]);
+    const languageName = langResult.rows.length > 0 ? langResult.rows[0].language_name : '';
+
+    if (languageName.toLowerCase() === 'engleski') {
+      console.log(`[FreeDictionaryAPI] Jezik je Engleski, pokušavam dohvatiti fraze za riječ: ${word_text}`);
+      const dictionaryResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word_text}`);
+
+      if (!dictionaryResponse.ok) {
+        if (dictionaryResponse.status === 404) {
+          return res.status(404).send(`Riječ '${word_text}' ne postoji u engleskom rječniku.`);
+        }
+        throw new Error('Free Dictionary API nije uspio.');
+      }
+
+      const data = await dictionaryResponse.json();
+      let foundExamples = [];
+      if (data && data[0]?.meanings) {
+        for (const meaning of data[0].meanings) {
+          for (const definition of meaning.definitions) {
+            if (definition.example) {
+              foundExamples.push(definition.example);
+            }
+          }
+        }
+      }
+
+      if (foundExamples.length > 0) {
+        phrases = foundExamples.slice(0, 3);
+        console.log(`[FreeDictionaryAPI] Uspješno dohvaćeno ${phrases.length} fraza.`);
+      } else {
+        phrases = [];
+      }
+    }
+    
     const newWordResult = await pool.query(
       "INSERT INTO words (word_text, language_id, translation_to_croatian, phrases) VALUES ($1, $2, $3, $4) ON CONFLICT (word_text, language_id) DO NOTHING RETURNING *",
       [word_text, language_id, translation_to_croatian, phrases]
@@ -397,21 +431,18 @@ app.post("/api/words", verifyToken, async (req, res) => {
     
     const ttsResponse = await fetch(ttsUrl, ttsOptions);
     
-    if (!ttsResponse.ok) {
+    if (ttsResponse.ok) {
+      const audioArrayBuffer = await ttsResponse.arrayBuffer();
+      const audioHexString = Buffer.from(audioArrayBuffer).toString('hex');
+      await pool.query(
+        "UPDATE words SET pronounciation = decode($1, 'hex') WHERE word_id = $2",
+        [audioHexString, newWord.word_id]
+      );
+      console.log(`Audio (preko decode('hex')) spremljen u bazu za riječ: ${word_text}`);
+    } else {
       console.error(`TTS API greška za riječ '${word_text}'.`);
-      return res.status(201).json(newWord);
     }
 
-    const audioArrayBuffer = await ttsResponse.arrayBuffer();
-    
-    const audioHexString = Buffer.from(audioArrayBuffer).toString('hex');
-
-    await pool.query(
-      "UPDATE words SET pronounciation = decode($1, 'hex') WHERE word_id = $2",
-      [audioHexString, newWord.word_id]
-    );
-    
-    console.log(`Audio (preko decode('hex')) spremljen u bazu za riječ: ${word_text}`);
     res.status(201).json(newWord);
 
   } catch (err) {
