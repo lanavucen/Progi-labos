@@ -7,127 +7,40 @@ const interval = {
   5: 20160, //14 dana  
 };
 
-class rasporediPosude{
-  constructor(languageId, userEmail, options = {}) {
-    this.languageId = languageId;
-    this.userEmail = userEmail;
-    this.storageKey = `learning_${userEmail}_${languageId}`;
-    this.wordProgress = {};
-    this.load();
-  }
+const API_URL = import.meta.env.VITE_API_URL || "";
 
-  load() {
-    try {
-      const data = localStorage.getItem(this.storageKey);
-      this.wordProgress = data ? JSON.parse(data) : {};
-    } catch (error) {
-      this.wordProgress = {};
-    }
-  }
-
-  save() {
-    try {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.wordProgress));
-    } catch (error) {
-    }
-  }
-
-  getWordProgress(wordId) {
-    if (!this.wordProgress[wordId]) {
-      return {
-        razina: 0,
-        sljedeciDatum: new Date(Date.now() - 86400000).toISOString(), 
-        zadnjiPokusaj: null,
-        tocni: 0,
-        netocni: 0
-      };
-    }
-    return this.wordProgress[wordId];
-  }
-
-  setWordProgress(wordId, progress) {
-    this.wordProgress[wordId] = progress;
-    this.save();
-  }
-
-  obradi(wordId, tocanOdgovor) {
-    const progress = this.getWordProgress(wordId);
-
-    if (!tocanOdgovor) {
-      progress.razina = 0;
-      progress.netocni = (progress.netocni || 0) + 1;
-    } else {
-      progress.razina = Math.min(progress.razina + 1, 5);
-      progress.tocni = (progress.tocni || 0) + 1; 
-    }
-
-    const intervalMinuta = interval[progress.razina];
-    const sljedeciDatum = new Date();
-    
-    const milisekunde = intervalMinuta * 60 * 1000;
-    sljedeciDatum.setTime(sljedeciDatum.getTime() + milisekunde);
-    
-    progress.sljedeciDatum = sljedeciDatum.toISOString();
-    progress.zadnjiPokusaj = new Date().toISOString();
-
-    this.setWordProgress(wordId, progress);
-
-    let postotak;
-    if (((progress.tocni || 0) + (progress.netocni || 0)) > 0){
-      postotak = progress.tocni / ((progress.tocni || 0) + (progress.netocni || 0)) * 100;
-    } else{
-      postotak = 0;
-    }
-    
-    return {
-      novaRazina: progress.razina,
-      posuda: `${progress.razina}`,
-      tocni: progress.tocni,
-      netocni: progress.netocni,
-      postotak: postotak
-    };
-  }
-
-  filtrirajRijeci(words) {
-    const sada = new Date();
-    
-    return words.filter(word => {
-      const progress = this.getWordProgress(word.word_id);
-      
-      if (progress.razina >= 5) return false;
-
-      const sljedeciDatum = new Date(progress.sljedeciDatum);
-      return sljedeciDatum <= sada;
-    });
-  }
-
-
-  reset() {
-    this.wordProgress = {};
-    this.save();
-  }
-
-  export() {
-    return {
-      languageId: this.languageId,
-      userEmail: this.userEmail,
-      data: this.wordProgress,
-      exportDate: new Date().toISOString(),
-    };
-  }
-
-  import(exportedData) {
-    if (!exportedData || 
-        exportedData.languageId !== this.languageId ||
-        exportedData.userEmail !== this.userEmail) {
-      return false;
-    }
-    
-    this.wordProgress = exportedData.data;
-    this.save();
-    return true;
-  }
+function authHeaders() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export default rasporediPosude;
+export async function progressInit(language_id) {
+  const res = await fetch(`${API_URL}/api/progress/init`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ language_id }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function progressDue(language_id, limit = 100) {
+  const res = await fetch(
+    `${API_URL}/api/progress/due?language_id=${language_id}&limit=${limit}`,
+    { headers: { ...authHeaders() } }
+  );
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function progressAnswer(language_id, word_id, correct) {
+  const res = await fetch(`${API_URL}/api/progress/answer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ language_id, word_id, correct }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export {interval};

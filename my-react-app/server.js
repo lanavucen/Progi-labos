@@ -586,6 +586,184 @@ app.post("/api/pronunciation/check", verifyToken, upload.single('audio'), async 
 });
 
 
+app.get("/api/usersettings", verifyToken, async (req, res) => {
+
+  const email = req.user.email;
+
+  const r = await pool.query(
+    "SELECT selected_language_id, selected_mod FROM user_settings WHERE user_email = $1",
+    [email]
+  );
+
+  res.json(r.rows[0] || null);
+});
+
+
+app.post("/api/usersettings", verifyToken, async (req, res) => {
+
+  const email = req.user.email;
+  const { selected_language_id, selected_mod } = req.body;
+
+  await pool.query(`
+    INSERT INTO user_settings (user_email, selected_language_id, selected_mod)
+    VALUES ($1, $2, $3)
+    ON CONFLICT (user_email)
+    DO UPDATE SET
+      selected_language_id = EXCLUDED.selected_language_id,
+      selected_mod = EXCLUDED.selected_mod
+  `, [email, selected_language_id, selected_mod]);
+
+  res.sendStatus(200);
+
+});
+
+
+app.post("/api/progress/init", verifyToken, async (req, res) => {
+  const email = req.user.email;
+  const { language_id } = req.body;
+
+  if (!language_id) return res.status(400).json({ error: "language_id is required" });
+
+  try {
+    const q = `
+      INSERT INTO learning_progress (user_email, language_id, word_id, razina, sljedeci_datum, zadnji_pokusaj, tocni, netocni)
+      SELECT $1, $2, w.word_id, 0, NOW(), NULL, 0, 0
+      FROM words w
+      WHERE w.language_id = $2
+      ON CONFLICT (user_email, language_id, word_id)
+      DO NOTHING
+    `;
+    const r = await pool.query(q, [email, Number(language_id)]);
+
+    res.json({ inserted: r.rowCount });
+  } catch (err) {
+    console.error("progress/init error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+app.get("/api/progress/due", verifyToken, async (req, res) => {
+  const email = req.user.email;
+  const language_id = Number(req.query.language_id);
+  const limit = Number(req.query.limit || 100);
+
+  if (!language_id) return res.status(400).json({ error: "language_id is required" });
+
+  try {
+    const q = `
+      SELECT
+        lp.word_id,
+        lp.razina,
+        lp.sljedeci_datum,
+        lp.tocni,
+        lp.netocni,
+        w.*
+      FROM learning_progress lp
+      JOIN words w
+        ON w.word_id = lp.word_id AND w.language_id = lp.language_id
+      WHERE lp.user_email = $1
+        AND lp.language_id = $2
+        AND lp.sljedeci_datum <= NOW()
+      ORDER BY lp.sljedeci_datum ASC
+      LIMIT $3
+    `;
+    const r = await pool.query(q, [email, language_id, limit]);
+    res.json(r.rows);
+  } catch (err) {
+    console.error("progress/due error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
+function nextDays(level) {
+  const arr = [0, 1, 2, 4, 7, 14, 30];
+  return arr[Math.min(level, arr.length - 1)];
+}
+
+app.post("/api/progress/answer", verifyToken, async (req, res) => {
+  const email = req.user.email;
+  const { language_id, word_id, correct } = req.body;
+
+  if (!language_id || !word_id || typeof correct !== "boolean") {
+    return res.status(400).json({ error: "language_id, word_id, correct(boolean) required" });
+  }
+
+  const langId = Number(language_id);
+  const wordId = Number(word_id);
+
+  const client = await pool.connect();
+  try {
+    await pool.query("BEGIN");
+
+    const cur = await client.query(
+      `SELECT razina
+       FROM learning_progress
+       WHERE user_email=$1 AND language_id=$2 AND word_id=$3
+       FOR UPDATE`,
+      [email, langId, wordId]
+    );
+
+    if (cur.rowCount === 0) {
+      await client.query(
+        `INSERT INTO learning_progress (user_email, language_id, word_id, razina, sljedeci_datum, zadnji_pokusaj, tocni, netocni)
+         VALUES ($1,$2,$3,0,NOW(),NULL,0,0)
+         ON CONFLICT (user_email, language_id, word_id) DO NOTHING`,
+        [email, langId, wordId]
+      );
+    }
+
+    const cur2 = await client.query(
+      `SELECT razina
+       FROM learning_progress
+       WHERE user_email=$1 AND language_id=$2 AND word_id=$3
+       FOR UPDATE`,
+      [email, langId, wordId]
+    );
+
+    const oldLevel = cur2.rows[0].razina;
+
+    let newLevel;
+    let nextDateExpr;
+
+    if (correct) {
+      newLevel = Math.min(oldLevel + 1, 6);
+      const days = nextDays(newLevel);
+      nextDateExpr = `NOW() + INTERVAL '${days} days'`;
+    } else {
+      newLevel = 0;
+      nextDateExpr = `NOW() + INTERVAL '10 minutes'`;
+    }
+
+    const upd = await client.query(
+      `
+      UPDATE learning_progress
+      SET
+        razina = $4,
+        sljedeci_datum = ${nextDateExpr},
+        zadnji_pokusaj = NOW(),
+        tocni = tocni + CASE WHEN $5 THEN 1 ELSE 0 END,
+        netocni = netocni + CASE WHEN $5 THEN 0 ELSE 1 END
+      WHERE user_email=$1 AND language_id=$2 AND word_id=$3
+      RETURNING user_email, language_id, word_id, razina, sljedeci_datum, tocni, netocni, zadnji_pokusaj
+      `,
+      [email, langId, wordId, newLevel, correct]
+    );
+
+    await client.query("COMMIT");
+    res.json(upd.rows[0]);
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("progress/answer error:", err);
+    res.status(500).json({ error: "Server error" });
+  } finally {
+    client.release();
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Server sluša na portu ${port}`);
 });

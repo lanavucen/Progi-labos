@@ -6,19 +6,17 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 
 function PostavkeIgre() {
     const navigate = useNavigate();
-    const [selectedMod, setSelectedMod] = useState(localStorage.getItem("selectedMod") || "");
-    const [selectedRjecnik, setSelectedRjecnik] = useState(localStorage.getItem("selectedRjecnik") || "");
+    const [selectedMod, setSelectedMod] = useState("");
+    const [selectedRjecnik, setSelectedRjecnik] = useState("");
     const [languages, setLanguages] = useState([]);
     const [error, setError] = useState("");
 
     const handleModChange = (event) => {
         setSelectedMod(event.target.value);
-        localStorage.setItem("selectedMod", event.target.value);
     }
 
     const handleRjecnikChange = (event) => {
         setSelectedRjecnik(event.target.value);
-        localStorage.setItem("selectedRjecnik", event.target.value);
     }
 
     const fetchLanguages = async () => {
@@ -46,23 +44,38 @@ function PostavkeIgre() {
         }
     };
 
-    useEffect(() => {
-        const user = localStorage.getItem("user");
-        if (!user) {
-            alert("Morate biti prijavljeni da biste postavili igru.");
-            navigate('/Prijava');
-            return;
-        } 
+    const loadSettings = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
-        const savedMod = localStorage.getItem("selectedMod");
-        const savedRjecnik = localStorage.getItem("selectedRjecnik");
-        
-        setSelectedMod(savedMod || "");
-        setSelectedRjecnik(savedRjecnik || "");
-        fetchLanguages();
+        const response = await fetch(`${API_URL}/api/usersettings`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json(); // object ili null
+
+        setSelectedMod(data?.selected_mod || "");
+        setSelectedRjecnik(
+            data?.selected_language_id != null ? String(data.selected_language_id) : ""
+        );
+    };
+
+    useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+        alert("Morate biti prijavljeni da biste postavili igru.");
+        navigate('/Prijava');
+        return;
+    }
+
+    fetchLanguages();
+    loadSettings();
     }, [navigate]);
 
-    const handleSubmitPostavkeIgre = (e) => {
+
+    const handleSubmitPostavkeIgre = async (e) => {
         e.preventDefault();
 
         if (!selectedMod || !selectedRjecnik) {
@@ -71,6 +84,20 @@ function PostavkeIgre() {
         }
 
         setError("");
+
+        const token = localStorage.getItem("token");
+
+        await fetch(`${API_URL}/api/usersettings`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+            selected_language_id: Number(selectedRjecnik),
+            selected_mod: selectedMod,
+        }),
+        });
         navigate("/igra", {
             state: { mod: selectedMod, rjecnik: selectedRjecnik }
         });

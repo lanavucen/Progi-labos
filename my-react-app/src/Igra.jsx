@@ -1,7 +1,7 @@
 import "./css/Igra.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import rasporediPosude from "./Posude.jsx";
+import { progressInit, progressDue, progressAnswer } from "./Posude.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -27,10 +27,7 @@ export default function Igra() {
   const [audioSrc, setAudioSrc] = useState('');
   const [audioStatus, setAudioStatus] = useState('idle');
  
-  const raspored = useMemo(() => {
-    if (!rjecnik || !user) return null;
-    return new rasporediPosude(rjecnik, user.email);
-  }, [rjecnik, user]);
+
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -44,32 +41,22 @@ export default function Igra() {
 
   }, [mod, rjecnik, navigate]);
 
-  const fetchWords = async (langId) => {
-    const token = localStorage.getItem("token"); 
-    if (!langId) {
-      setAllWords([]);
-      return;
-    }
-    
-    try {
-      const response = await fetch(`${API_URL}/api/words?language_id=${langId}&mod=${mod}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setAllWords(data);
-  
-      if (raspored && data.length > 0) {
-        const filtrirane = raspored.filtrirajRijeci(data);
-        setWords(filtrirane);
-      } else {
+    const fetchWords = async (langId) => {
+      if (!langId) {
+        setWords([]);
+        return;
+      }
+
+      try {
+        await progressInit(Number(langId));
+        const due = await progressDue(Number(langId), 100);
+        setWords(due || []);
+      } catch (err) {
+        console.error("Greška pri dohvaćanju riječi:", err);
         setWords([]);
       }
-      
-
-    } catch (err) {
-      console.error("Greška pri dohvaćanju riječi:", err);
-    }
   };
+
 
   const fetchChoices = async (langId, wordId) => {
     const token = localStorage.getItem("token"); 
@@ -103,10 +90,11 @@ export default function Igra() {
   };
 
   useEffect(() => {
-    if (rjecnik && raspored) {
+    if (rjecnik && user) {
       fetchWords(rjecnik);
     }
-  }, [rjecnik, raspored]);
+  }, [rjecnik, user, mod]);
+
 
   useEffect(() => {
     if (words.length > 0 && !currentWord) {
@@ -133,15 +121,18 @@ export default function Igra() {
       });
       const correctAnswer = await res.json();
       const isCorrect = selectedAnswer === correctAnswer;
-      const rezultat = raspored.obradi(wordId, isCorrect);
+
+      await progressAnswer(Number(rjecnik), Number(wordId), !!isCorrect);
 
       if (isCorrect) {
-        setResult(`Correct! "${rezultat.posuda}".`);
+        setResult(`Correct!`);
       } else {
-        setResult(`Incorrect. The correct answer was "${correctAnswer}" "${rezultat.posuda}".`);
+        setResult(`Incorrect. The correct answer was "${correctAnswer}".`);
       }
-      const filtrirane = raspored.filtrirajRijeci(allWords);
-      setWords(filtrirane);
+
+      const due = await progressDue(Number(rjecnik), 100);
+      setWords(due || []);
+
 
     } catch (err) {
       console.error("Greška pri obradi odgovora:", err);
@@ -156,16 +147,19 @@ export default function Igra() {
     }
 
     const isCorrect = writtenAnswer.trim().toLowerCase() === currentWord.word_text.toLowerCase();
-    const srsResult = raspored.obradi(currentWord.word_id, isCorrect);
+
+    progressAnswer(Number(rjecnik), Number(currentWord.word_id), !!isCorrect)
+      .then(async () => {
+        const due = await progressDue(Number(rjecnik), 100);
+        setWords(due || []);
+      });
 
     if (isCorrect) {
-      setResult(`Točno! Nova razina: ${srsResult.posuda}.`);
+      setResult(`Točno!`);
     } else {
-      setResult(`Netočno. Ispravna riječ je bila "${currentWord.word_text}". Nova razina: ${srsResult.posuda}.`);
+      setResult(`Netočno. Ispravna riječ je bila "${currentWord.word_text}".`);
     }
 
-    const filtrirane = raspored.filtrirajRijeci(allWords);
-    setWords(filtrirane);
   };
 
   const handleNext = () => {
@@ -226,20 +220,22 @@ export default function Igra() {
         
         if (response.status === 503) {
             setResult(data.error);
-            raspored.obradi(currentWord.word_id, true);
+            await progressAnswer(Number(rjecnik), Number(currentWord.word_id), true);
         } else if (response.ok) {
             const score = data.score.toFixed(1);
             const isCorrect = score >= 7.0;
-            const srsResult = raspored.obradi(currentWord.word_id, isCorrect);
-            setResult(`Ocjena izgovora: ${score}/10. ${isCorrect ? 'Odlično!' : 'Pokušaj opet!'} Nova razina: ${srsResult.posuda}.`);
+            await progressAnswer(Number(rjecnik), Number(currentWord.word_id), !!isCorrect);
+            setResult(`Ocjena izgovora: ${score}/10. ${isCorrect ? 'Odlično!' : 'Pokušaj opet!'}`);
         } else {
             setResult("Došlo je do greške pri provjeri.");
         }
+
+        const due = await progressDue(Number(rjecnik), 100);
+        setWords(due || []);
+
     } catch (err) {
         setResult("Došlo je do greške pri spajanju.");
     }
-    const filtrirane = raspored.filtrirajRijeci(allWords);
-    setWords(filtrirane);
   };
   
   const fetchAudio = async (wordId) => {

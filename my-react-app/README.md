@@ -63,6 +63,24 @@ CREATE TABLE words (
     UNIQUE (word_text, language_id)
 );
 
+CREATE TABLE learning_progress (
+  user_email TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE,
+  language_id INT NOT NULL REFERENCES languages(language_id) ON DELETE CASCADE,
+  word_id INT NOT NULL REFERENCES words(word_id) ON DELETE CASCADE,
+  razina SMALLINT NOT NULL DEFAULT 0,
+  sljedeci_datum TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  zadnji_pokusaj TIMESTAMPTZ,
+  tocni INT NOT NULL DEFAULT 0,
+  netocni INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_email, language_id, word_id)
+);
+
+CREATE TABLE user_settings (
+  user_email TEXT PRIMARY KEY REFERENCES users(email) ON DELETE CASCADE,
+  selected_language_id INT REFERENCES languages(language_id),
+  selected_mod TEXT NOT NULL DEFAULT 'mod1'
+);
+
 INSERT INTO languages (language_name) VALUES ('Engleski');
 INSERT INTO languages (language_name) VALUES ('Njemački');
 INSERT INTO languages (language_name) VALUES ('Španjolski');
