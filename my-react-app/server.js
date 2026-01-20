@@ -220,6 +220,40 @@ app.get("/api/admin/dashboard", verifyToken, async (req, res) => {
   }
 });
 
+app.get("/api/stats", verifyToken, async (req, res) => {
+  try {
+    const userEmail = req.user.email;
+
+    const statsQuery = `
+      SELECT
+        COUNT(*) AS total_words,
+        COUNT(CASE WHEN razina > 0 THEN 1 END) AS learned_words,
+        COUNT(CASE WHEN razina >= 5 THEN 1 END) AS mastered_words,
+        SUM(tocni) AS total_correct,
+        SUM(netocni) AS total_incorrect
+      FROM learning_progress
+      WHERE user_email = $1;
+    `;
+
+    const result = await pool.query(statsQuery, [userEmail]);
+
+    const stats = {
+      total_words: parseInt(result.rows[0].total_words) || 0,
+      learned_words: parseInt(result.rows[0].learned_words) || 0,
+      mastered_words: parseInt(result.rows[0].mastered_words) || 0,
+      total_correct: parseInt(result.rows[0].total_correct) || 0,
+      total_incorrect: parseInt(result.rows[0].total_incorrect) || 0,
+    };
+
+    res.json(stats);
+
+  } catch (err) {
+    console.error("Greška pri dohvaćanju statistike:", err.message);
+    res.status(500).send("Greška na serveru pri dohvaćanju statistike.");
+  }
+});
+
+
 app.put("/api/users/:targetEmail/role", verifyToken, async (req, res) => {
   try {
     const { targetEmail } = req.params;

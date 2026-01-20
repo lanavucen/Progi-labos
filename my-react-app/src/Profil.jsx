@@ -14,6 +14,7 @@ function Profil() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [stats, setStats] = useState(null); 
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -128,6 +129,29 @@ function Profil() {
       setMessage("Greška pri spajanju na server.");
     }
   };
+  
+  const fetchStats = async () => {
+    setActiveView('statistika');
+    setStats(null);
+
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(`${API_URL}/api/stats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error("Nije moguće dohvatiti statistiku.");
+      }
+
+      const data = await response.json();
+      setStats(data);
+
+    } catch (err) {
+      console.error(err.message);
+      setStats({ error: "Došlo je do greške." });
+    }
+  };
 
   if (!user) {
     return <div>Učitavanje...</div>;
@@ -158,7 +182,9 @@ function Profil() {
           <p className="kategorija" onClick={() => setActiveView("podatci")} style={{ cursor: "pointer" }}>
             Podatci
           </p>
-          <p className="kategorija">Statistika</p>
+          <p className="kategorija" onClick={fetchStats} style={{ cursor: "pointer" }}>
+            Statistika
+          </p>
           <p
             className="kategorija"
             onClick={() => {
@@ -215,6 +241,25 @@ function Profil() {
               <p>
                 <strong>Uloga:</strong> {isMainAdmin ? "Glavni Admin" : isAdmin ? "Admin" : "Korisnik"}
               </p>
+            </div>
+          )}
+          {activeView === 'statistika' && (
+            <div>
+              <h3>Vaša Statistika</h3>
+              {!stats ? (
+                <p>Učitavam statistiku...</p>
+              ) : stats.error ? (
+                <p style={{color: 'red'}}>{stats.error}</p>
+              ) : (
+                <>
+                  <p><strong>{'Ukupno riječi u učenju: '}</strong> {stats.total_words}</p>
+                  <p><strong>{'Naučene riječi (razina > 0): '}</strong> {stats.learned_words}</p>
+                  <p><strong>{'Savladane riječi (razina >= 5): '}</strong> {stats.mastered_words}</p>
+                  <hr />
+                  <p><strong>{'Ukupno točnih odgovora: '}</strong> {stats.total_correct}</p>
+                  <p><strong>{'Ukupno netočnih odgovora:'}</strong> {stats.total_incorrect}</p>
+                </>
+              )}
             </div>
           )}
           {activeView === "ime" && (
