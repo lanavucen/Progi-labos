@@ -226,11 +226,21 @@ app.get("/api/stats", verifyToken, async (req, res) => {
 
     const statsQuery = `
       SELECT
+        -- Ukupna statistika (postojeća)
         COUNT(*) AS total_words,
         COUNT(CASE WHEN razina > 0 THEN 1 END) AS learned_words,
         COUNT(CASE WHEN razina >= 5 THEN 1 END) AS mastered_words,
         SUM(tocni) AS total_correct,
-        SUM(netocni) AS total_incorrect
+        SUM(netocni) AS total_incorrect,
+
+        -- Dnevna statistika (broji samo odgovore od danas)
+        SUM(tocni) FILTER (WHERE zadnji_pokusaj >= date_trunc('day', NOW())) AS daily_correct,
+        SUM(netocni) FILTER (WHERE zadnji_pokusaj >= date_trunc('day', NOW())) AS daily_incorrect,
+
+        -- Tjedna statistika (broji samo odgovore u zadnjih 7 dana)
+        SUM(tocni) FILTER (WHERE zadnji_pokusaj >= NOW() - INTERVAL '7 days') AS weekly_correct,
+        SUM(netocni) FILTER (WHERE zadnji_pokusaj >= NOW() - INTERVAL '7 days') AS weekly_incorrect
+
       FROM learning_progress
       WHERE user_email = $1;
     `;
@@ -243,6 +253,10 @@ app.get("/api/stats", verifyToken, async (req, res) => {
       mastered_words: parseInt(result.rows[0].mastered_words) || 0,
       total_correct: parseInt(result.rows[0].total_correct) || 0,
       total_incorrect: parseInt(result.rows[0].total_incorrect) || 0,
+      daily_correct: parseInt(result.rows[0].daily_correct) || 0,
+      daily_incorrect: parseInt(result.rows[0].daily_incorrect) || 0,
+      weekly_correct: parseInt(result.rows[0].weekly_correct) || 0,
+      weekly_incorrect: parseInt(result.rows[0].weekly_incorrect) || 0,
     };
 
     res.json(stats);

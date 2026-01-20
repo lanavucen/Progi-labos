@@ -252,12 +252,34 @@ function Profil() {
                 <p style={{color: 'red'}}>{stats.error}</p>
               ) : (
                 <>
-                  <p><strong>{'Ukupno riječi u učenju: '}</strong> {stats.total_words}</p>
-                  <p><strong>{'Naučene riječi (razina > 0): '}</strong> {stats.learned_words}</p>
-                  <p><strong>{'Savladane riječi (razina >= 5): '}</strong> {stats.mastered_words}</p>
+                  <h4>Ukupno</h4>
+                  <p><strong>Ukupno riječi u učenju:</strong> {stats.total_words}</p>
+                  <p><strong>{'Naučene riječi (razina > 0):'}</strong> {stats.learned_words}</p>
+                  <p><strong>{'Savladane riječi (razina >= 5):'}</strong> {stats.mastered_words}</p>
+
                   <hr />
-                  <p><strong>{'Ukupno točnih odgovora: '}</strong> {stats.total_correct}</p>
-                  <p><strong>{'Ukupno netočnih odgovora:'}</strong> {stats.total_incorrect}</p>
+
+                  <h4>Danas</h4>
+                  <p>Točnih odgovora: {stats.daily_correct}</p>
+                  <p>Netočnih odgovora: {stats.daily_incorrect}</p>
+                  { (stats.daily_correct + stats.daily_incorrect > 0) &&
+                    <p>
+                      <strong>Postotak točnosti: </strong> 
+                      { ((stats.daily_correct / (stats.daily_correct + stats.daily_incorrect)) * 100).toFixed(0) }%
+                    </p>
+                  }
+
+                  <hr />
+
+                  <h4>Ovaj tjedan (zadnjih 7 dana)</h4>
+                  <p>Točnih odgovora: {stats.weekly_correct}</p>
+                  <p>Netočnih odgovora: {stats.weekly_incorrect}</p>
+                  { (stats.weekly_correct + stats.weekly_incorrect > 0) &&
+                    <p>
+                      <strong>Postotak točnosti: </strong> 
+                      { ((stats.weekly_correct / (stats.weekly_correct + stats.weekly_incorrect)) * 100).toFixed(0) }%
+                    </p>
+                  }
                 </>
               )}
             </div>
