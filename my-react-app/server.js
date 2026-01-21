@@ -8,10 +8,13 @@ import session from "express-session";
 import "dotenv/config";
 import { verifyToken } from './authMiddleware.js';
 import multer from 'multer';
+import bcrypt from "bcryptjs";
 
 const { Pool } = pg;
 const app = express();
 const port = 3001;
+
+const saltRounds = 10;
 
 app.use(cors());
 app.use(express.json());
@@ -116,6 +119,7 @@ app.get('/api/auth/google/callback',
 
 app.post("/api/registracija", async (req, res) => {
   const { name, email, password } = req.body;
+  let hashedPassword;
 
   const emailRegex = /^\S+@\S+\.\S+$/;
   if (!emailRegex.test(email)) {
@@ -131,12 +135,18 @@ app.post("/api/registracija", async (req, res) => {
   if (password.length < 4 || password.length > 100) {
     return res.status(400).send("Lozinka mora imati između 4 i 100 znakova.");
   }
-
+  try{
+    const salt = await bcrypt.genSalt(saltRounds);
+    hashedPassword = await bcrypt.hash(password, salt);
+  } catch(err){
+    console.log(err.message);
+    return res.status(401).json("Greška pri spremanju lozinke");
+  }
   try {
     const newUser = await pool.query("INSERT INTO users (name, email, password) VALUES($1, $2, $3) RETURNING *", [
       name,
       email,
-      password
+      hashedPassword,
     ]);
     res.status(201).json(newUser.rows[0]);
   } catch (err) {
@@ -159,8 +169,15 @@ app.post("/api/prijava", async (req, res) => {
 
     const user = userResult.rows[0];
 
-    if (user.password !== password) {
-      return res.status(401).json("Pogrešna lozinka");
+    try {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json("Pogrešna lozinka");
+      }
+
+    } catch (err) {
+      console.error("Bcrypt compare failed:", err);
+      return res.status(401).json("Pogreška pri autentifikaciji");
     }
 
     const token = jwt.sign(
