@@ -71,8 +71,8 @@ body{
     width: 15em;
     height: 2em;
     text-align: center;
-    background-color: blue;
-    color: white;
+    background-color: #ffa952;
+    color: black;
     border-radius: 10px;
     border:1px solid black
 }

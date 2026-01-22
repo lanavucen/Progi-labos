@@ -53,7 +53,7 @@ function Prijava() {
 
   return (
     <div className="containerprijava">
-      <h1 className="headerprijava">APLIKACIJA</h1>
+      <h1 className="headerprijava">FlipMemo</h1>
       <p>Nemaš račun? </p>
       <p>Registriraj se besplatno</p>
       <button className="signinbutton" onClick={() => navigate("/Registracija")}>

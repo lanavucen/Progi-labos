@@ -1,4 +1,4 @@
 function Naslov() {
-  return "APLIKACIJA";
+  return "FlipMemo";
 }
 export default Naslov;

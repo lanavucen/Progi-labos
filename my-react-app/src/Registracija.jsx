@@ -67,7 +67,7 @@ function Registracija() {
 
   return (
     <div className="containerprijava">
-      <h1 className="headerprijava">APLIKACIJA</h1>
+      <h1 className="headerprijava">FlipMemo</h1>
 
       <input
         className="podatci"
