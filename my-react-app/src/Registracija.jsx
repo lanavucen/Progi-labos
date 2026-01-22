@@ -1,7 +1,7 @@
 import "./css/Registracija.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import Consent from "./consent";
+import Consent from "./Consent";
 
 const API_URL = import.meta.env.VITE_API_URL || "";
 
