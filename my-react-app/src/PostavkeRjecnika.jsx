@@ -1,6 +1,7 @@
 import "./css/PostavkeRjecnika.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import wordList from './assets/wordlist.js';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -17,6 +18,8 @@ function PostavkeRjecnika() {
   const [editingWord, setEditingWord] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoadingSearch, setIsLoadingSearch] = useState(false);
   
   const fetchLanguages = async () => {
     const token = localStorage.getItem("token");
@@ -46,6 +49,29 @@ function PostavkeRjecnika() {
     } catch (err) {
       console.error("Greška pri dohvaćanju riječi:", err);
     }
+  };
+  
+  const handleSearchChange = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+
+    if (term.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    // Filtriraj lokalnu listu riječi. Puno brže od API poziva!
+    const filtered = wordList.filter(word => 
+      word.toLowerCase().startsWith(term.toLowerCase())
+    );
+    
+    setSearchResults(filtered.slice(0, 10)); // Pokaži najviše 10 rezultata
+  };
+
+  const handleSelectSearchResult = (word) => {
+    setNewWord({ text: word, translation: '', phrases: '' });
+    setSearchTerm('');
+    setSearchResults([]);
   };
 
   useEffect(() => {
@@ -157,7 +183,7 @@ function PostavkeRjecnika() {
       word.word_text.toLowerCase().includes(searchTerm.toLowerCase()) ||
       word.translation_to_croatian.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  
   return (
     <div className="containerPR">
       <h1 className="headerPR">Postavke riječnika</h1>
@@ -207,6 +233,29 @@ function PostavkeRjecnika() {
 
         {selectedLanguageId && !editingWord && (
           <>
+            {languages.find(l => l.language_id == selectedLanguageId)?.language_name.toLowerCase() === 'engleski' && (
+              <>
+                <p className="naslovPR">Pretraga engleskog rječnika:</p>
+                <div className="info">
+                  <p>Upiši početak riječi:</p>
+                  <input
+                    type="text"
+                    placeholder="Npr. 'jour...'"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+                {searchResults.length > 0 && (
+                  <ul className="search-results-list">
+                    {searchResults.map((word, index) => (
+                      <li key={index} onClick={() => handleSelectSearchResult(word)}>
+                        {word}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
             <p className="naslovPR">Dodavanje riječi:</p>
             <div className="info">
               <p>Upiši riječ:</p>

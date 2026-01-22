@@ -159,3 +159,26 @@ body{
   border-radius: 10px;
 }
 
+.search-results-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 1em 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.search-results-list li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.search-results-list li:last-child {
+  border-bottom: none;
+}
+
+.search-results-list li:hover {
+  background-color: #f0f0f0;
+}
