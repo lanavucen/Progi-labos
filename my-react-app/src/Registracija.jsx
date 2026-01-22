@@ -1,8 +1,9 @@
 import "./css/Registracija.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import Consent from "./consent";
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 function Registracija() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ function Registracija() {
   const [password, setPassword] = useState("");
 
   const [errors, setErrors] = useState({});
+  const [showConsent, setShowConsent] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -32,19 +34,19 @@ function Registracija() {
     }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+    setShowConsent(true);
+  };
 
-    if (!validateForm()) {
-      return;
-    }
-
+  const submitRegistration = async () => {
     try {
       const body = { name, email, password };
+
       const response = await fetch(`${API_URL}/api/registracija`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,7 +61,6 @@ function Registracija() {
         setErrors({ server: errorData });
       }
     } catch (err) {
-      console.error(err.message);
       setErrors({ server: "Došlo je do greške pri spajanju na server." });
     }
   };
@@ -68,13 +69,19 @@ function Registracija() {
     <div className="containerprijava">
       <h1 className="headerprijava">APLIKACIJA</h1>
 
-      <input className="podatci" type="text" placeholder="Ime" value={name} onChange={(e) => setName(e.target.value)} />
+      <input
+        className="podatci"
+        type="text"
+        placeholder="Ime"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
       {errors.name && <p className="error-message">{errors.name}</p>}
 
       <input
         className="podatci"
         type="email"
-        placeholder="email"
+        placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
@@ -95,10 +102,27 @@ function Registracija() {
 
       {errors.server && <p className="error-message">{errors.server}</p>}
 
-      <p>Ipak imaš račun? </p>
-      <button className="prijavisebutton" onClick={() => navigate("/Prijava")}>
+      <p>Ipak imaš račun?</p>
+      <button
+        className="prijavisebutton"
+        onClick={() => navigate("/Prijava")}
+      >
         Sign in
       </button>
+
+      {showConsent && (
+        <Consent
+          onAccept={() => {
+            setShowConsent(false);
+            submitRegistration();
+          }}
+          onDecline={() => {
+            setShowConsent(false);
+            alert("Registracija nije dovršena, molimo prihvatite privolu o podatcima.");
+            navigate("/Registracija");
+          }}
+        />
+      )}
     </div>
   );
 }
