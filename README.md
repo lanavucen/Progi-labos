@@ -18,8 +18,6 @@ Ključni zahtjevi našeg rada su:
 > Backend - Node.js
 > 
 > Baza podataka - PostgreSQL
->  
-> Dizajn - Figma
 > 
 > Testiranje - Postman
 > 
